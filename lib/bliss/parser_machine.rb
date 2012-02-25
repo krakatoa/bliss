@@ -7,6 +7,8 @@ module Bliss
       @path = path
     end
 
+    # def on_element('tag', block)
+
     def parse
       @io_read, @io_write = IO.pipe
       @bytes = 0
@@ -19,7 +21,7 @@ module Bliss
       
         http = EM::HttpRequest.new(@path).get
         http.stream { |chunk|
-          if @bytes > 10000
+          if @bytes > 3000
             @io_write << "\n"
             EM.stop
           else
