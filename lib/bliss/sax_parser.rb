@@ -7,8 +7,10 @@ module Bliss
     #end
 
     def start_element(element, attributes=[])
+      puts element
     end
 
     def end_element(element, attributes=[])
+    end
   end
 end
