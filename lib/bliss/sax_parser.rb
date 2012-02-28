@@ -19,22 +19,30 @@ module Bliss
       current = @nodes.pair_at_chain(@depth)
 
       value_at = @nodes.value_at_chain(@depth)
+      
+      #if element == 'picture'
+      #  puts current.inspect
+      #  puts value_at.inspect
+      #  puts '--\n'
+      #end
 
       if current.is_a? Hash
         if value_at.is_a? NilClass
           current[element] = {}
         elsif value_at.is_a? Hash
-          current[element] = [current[element], {}]
-          current = @nodes.pair_at_chain(@depth)
+          if current[element].is_a? Array
+            current[element].concat [{}]
+          else
+            current[element] = [current[element], {}]
+            #current = @nodes.pair_at_chain(@depth)
+          end
         elsif value_at.is_a? Array
           #puts @depth.inspect
           #puts current[element].inspect
-          current[element].concat [{}]
           #puts current[element].inspect
         end
       elsif current.is_a? Array
       end
-      #puts current.inspect
 
       @current_content = ''
     end

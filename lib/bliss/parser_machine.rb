@@ -21,7 +21,7 @@ module Bliss
       
         http = EM::HttpRequest.new(@path).get
         http.stream { |chunk|
-          if @bytes > 20000
+          if @bytes > 15000
             @io_write << "\n"
             EM.stop
           else
