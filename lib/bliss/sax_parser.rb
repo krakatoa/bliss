@@ -14,21 +14,21 @@ module Bliss
     def start_element(element, attributes)
       # element_transformation
       @depth.push(element) if @depth.last != element
-      
+
       current = @nodes.pair_at_chain(@depth)
 
-      puts element
-      puts @depth.inspect
-      puts @nodes.inspect
+      value_at = @nodes.value_at_chain(@depth)
 
-      case @nodes.value_at_chain(@depth).class
-        when String
+      if value_at.is_a? NilClass
+        current[element] = {}
+      #elsif value_at.is_a? Array
+      #  current[element] = current.last
+      elsif value_at.is_a? Hash
+        if value_at.size == 0
           current[element] = [current[element]]
-          current[element].push @current_content
-        when Array
-          current[element].push @current_content
-        when Hash
-          puts 'hash'
+        else
+          current[element] = [current[element], {}]
+        end
       end
 
       @current_content = ''
@@ -45,19 +45,19 @@ module Bliss
     def end_element(element, attributes=[])
       # element_transformation
 
-      current = @nodes.pair_at_chain(@depth)
+      #current = @nodes.pair_at_chain(@depth)
       #puts current.inspect
       #puts @nodes.value_at_chain(@depth).class
 
-      case @nodes.value_at_chain(@depth).class
-        when NilClass
-          current[element] = @current_content
-        when String
-          current[element] = [current[element]]
-          current[element].push @current_content
-        when Array
-          current[element].push @current_content
-      end
+      #case @nodes.value_at_chain(@depth).class
+      #  when NilClass
+      #    current[element] = @current_content
+      #  when String
+      #    current[element] = [current[element]]
+      #    current[element].push @current_content
+      #  when Array
+      #    current[element].push @current_content
+      #end
 
       @depth.pop if @depth.last == element
     end
