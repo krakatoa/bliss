@@ -1,8 +1,8 @@
 module Bliss
   class ParserMachine
     def initialize(path)
-      #url = 'http://www.universobit.com.ar/AvisosUniversobit/trovit/AvisosUniversobit_1.xml'
-      #url = 'http://www.aestrenar.com.ar/backend/rssAestrenar.xml'
+      #path = 'http://www.universobit.com.ar/AvisosUniversobit/trovit/AvisosUniversobit_1.xml'
+      #path = 'http://www.aestrenar.com.ar/backend/rssAestrenar.xml'
       path = 'http://procarnet.es/feed/sumavisos/sumavisos.xml'
       @path = path
     end
@@ -21,7 +21,7 @@ module Bliss
       
         http = EM::HttpRequest.new(@path).get
         http.stream { |chunk|
-          if @bytes > 3000
+          if @bytes > 20000
             @io_write << "\n"
             EM.stop
           else
@@ -31,8 +31,8 @@ module Bliss
         }
         http.callback { EM.stop }
       end
-      puts @io_read.gets
-      puts @bytes
+      #puts @io_read.gets
+      #puts @bytes
     end
   end
 end

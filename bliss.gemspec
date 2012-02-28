@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Fernando Alonso"]
-  s.date = "2012-02-25"
+  s.date = "2012-02-28"
   s.description = "streamed xml parsing tool"
   s.email = "krakatoa1987@gmail.com"
   s.extra_rdoc_files = [
@@ -19,43 +19,57 @@ Gem::Specification.new do |s|
   s.files = [
     ".document",
     "Gemfile",
+    "Gemfile.lock",
     "LICENSE.txt",
     "README.rdoc",
     "Rakefile",
+    "VERSION",
+    "bliss.gemspec",
+    "hash.rb",
     "http-machine.rb",
     "lib/bliss.rb",
     "lib/bliss/parser.rb",
     "lib/bliss/parser_machine.rb",
     "lib/bliss/sax_parser.rb",
     "lib/hash_extension.rb",
+    "test.rb",
     "test/helper.rb",
     "test/test_bliss.rb"
   ]
   s.homepage = "http://github.com/krakatoa/bliss"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.10"
+  s.rubygems_version = "1.8.15"
   s.summary = "streamed xml parsing tool"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
+      s.add_runtime_dependency(%q<eventmachine>, [">= 0"])
+      s.add_runtime_dependency(%q<em-http-request>, [">= 0"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
-      s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<simplecov>, [">= 0"])
     else
+      s.add_dependency(%q<nokogiri>, [">= 0"])
+      s.add_dependency(%q<eventmachine>, [">= 0"])
+      s.add_dependency(%q<em-http-request>, [">= 0"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
-      s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<simplecov>, [">= 0"])
     end
   else
+    s.add_dependency(%q<nokogiri>, [">= 0"])
+    s.add_dependency(%q<eventmachine>, [">= 0"])
+    s.add_dependency(%q<em-http-request>, [">= 0"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
-    s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<simplecov>, [">= 0"])
   end
 end
 

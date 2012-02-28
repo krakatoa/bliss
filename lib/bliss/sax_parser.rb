@@ -15,21 +15,26 @@ module Bliss
       # element_transformation
       @depth.push(element) if @depth.last != element
 
+      #puts @depth.inspect
       current = @nodes.pair_at_chain(@depth)
 
       value_at = @nodes.value_at_chain(@depth)
 
-      if value_at.is_a? NilClass
-        current[element] = {}
-      #elsif value_at.is_a? Array
-      #  current[element] = current.last
-      elsif value_at.is_a? Hash
-        if value_at.size == 0
-          current[element] = [current[element]]
-        else
+      if current.is_a? Hash
+        if value_at.is_a? NilClass
+          current[element] = {}
+        elsif value_at.is_a? Hash
           current[element] = [current[element], {}]
+          current = @nodes.pair_at_chain(@depth)
+        elsif value_at.is_a? Array
+          #puts @depth.inspect
+          #puts current[element].inspect
+          current[element].concat [{}]
+          #puts current[element].inspect
         end
+      elsif current.is_a? Array
       end
+      #puts current.inspect
 
       @current_content = ''
     end
@@ -45,19 +50,24 @@ module Bliss
     def end_element(element, attributes=[])
       # element_transformation
 
-      #current = @nodes.pair_at_chain(@depth)
-      #puts current.inspect
-      #puts @nodes.value_at_chain(@depth).class
+      current = @nodes.pair_at_chain(@depth)
+      value_at = @nodes.value_at_chain(@depth)
 
-      #case @nodes.value_at_chain(@depth).class
-      #  when NilClass
-      #    current[element] = @current_content
-      #  when String
-      #    current[element] = [current[element]]
-      #    current[element].push @current_content
-      #  when Array
-      #    current[element].push @current_content
-      #end
+      if value_at.is_a? Hash
+        current[element] = @current_content if @current_content.size > 0
+      elsif value_at.is_a? NilClass
+        if current.is_a? Array
+          current = current.last
+          current[element] = @current_content if @current_content.size > 0
+        end
+      end
+      @current_content = ''
+      
+      if element == 'ad'
+        puts "---\n"
+        puts "---\n"
+        puts @nodes.inspect
+      end
 
       @depth.pop if @depth.last == element
     end
