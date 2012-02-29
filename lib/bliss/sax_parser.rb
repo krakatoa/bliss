@@ -100,13 +100,8 @@ module Bliss
       @current_content = ''
       
       if @on_tag_close.has_key? element
-        @on_tag_close[element].call
+        @on_tag_close[element].call(value_at)
       end
-      #if element == 'ad'
-      #  puts "---\n"
-      #  puts "---\n"
-      #  puts @nodes.inspect
-      #end
 
       @depth.pop if @depth.last == element
     end
