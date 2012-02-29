@@ -1,38 +1,62 @@
 module Bliss
   class ParserMachine
     def initialize(path)
-      #path = 'http://www.universobit.com.ar/AvisosUniversobit/trovit/AvisosUniversobit_1.xml'
-      #path = 'http://www.aestrenar.com.ar/backend/rssAestrenar.xml'
-      path = 'http://procarnet.es/feed/sumavisos/sumavisos.xml'
       @path = path
+      
+      @sax_parser = Bliss::SaxParser.new
+
+      @parser = Nokogiri::XML::SAX::PushParser.new(@sax_parser)
+
+      @file = File.new('output.xml', 'w')
+
+      @root = nil
+      @nodes = nil
+
+      on_root {}
     end
 
-    # def on_element('tag', block)
+    def on_root(&block)
+      return false if not block.is_a? Proc
+      @sax_parser.on_root { |root|
+        @root = root
+        block.call(root)
+      }
+    end
+
+    def on_tag_close(element, &block)
+      @sax_parser.on_tag_close(element, block)
+    end
+
+    def root
+      @root
+    end
+
+    def close
+      @sax_parser.close
+    end
 
     def parse
-      @io_read, @io_write = IO.pipe
       @bytes = 0
 
       EM.run do
-        EM.defer do
-          parser = Nokogiri::XML::SAX::Parser.new(Bliss::SaxParser.new)
-          parser.parse_io(@io_read)
-        end
-      
         http = EM::HttpRequest.new(@path).get
         http.stream { |chunk|
-          if @bytes > 15000
-            @io_write << "\n"
-            EM.stop
+          @parser << chunk
+
+          @bytes += chunk.length
+          
+          if not @sax_parser.is_closed?
+            @file << chunk
           else
-            @io_write << chunk
-            @bytes += chunk.length
+            last_index = chunk.index('</ad>') + 4
+            @file << chunk[0..last_index]
+            @file << "</#{self.root}>"
+
+            EM.stop
           end
         }
         http.callback { EM.stop }
       end
-      #puts @io_read.gets
-      #puts @bytes
     end
   end
 end

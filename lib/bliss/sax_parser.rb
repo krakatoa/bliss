@@ -4,15 +4,43 @@ module Bliss
       @depth = []
       # @settings = {} # downcased
 
+      @root = nil
       @nodes = {}
       @current_node = {}
+
+      @on_root = nil
+      @on_tag_close = {}
+
+      @closed = false
+
     end
 
-    #def on_element(element, &block)
-    #end
+    def on_root(&block)
+      @on_root = block
+    end
+
+    def on_tag_close(element, block)
+      @on_tag_close.merge!({element => block})
+    end
+
+    def close
+      @closed = true
+    end
+
+    def is_closed?
+      @closed
+    end
 
     def start_element(element, attributes)
       # element_transformation
+
+      if @root == nil
+        @root = element
+        if @on_root.is_a? Proc
+          @on_root.call(@root)
+        end
+      end
+
       @depth.push(element) if @depth.last != element
 
       #puts @depth.inspect
@@ -71,11 +99,14 @@ module Bliss
       end
       @current_content = ''
       
-      if element == 'ad'
-        puts "---\n"
-        puts "---\n"
-        puts @nodes.inspect
+      if @on_tag_close.has_key? element
+        @on_tag_close[element].call
       end
+      #if element == 'ad'
+      #  puts "---\n"
+      #  puts "---\n"
+      #  puts @nodes.inspect
+      #end
 
       @depth.pop if @depth.last == element
     end
