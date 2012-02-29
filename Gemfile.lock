@@ -33,7 +33,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.0.0)
   em-http-request
-  eventmachine
+  eventmachine (>= 0.12)
   jeweler (~> 1.6.4)
   nokogiri
   shoulda
