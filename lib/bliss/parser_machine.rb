@@ -7,7 +7,7 @@ module Bliss
 
       @parser = Nokogiri::XML::SAX::PushParser.new(@sax_parser)
 
-      @file = File.new('output.xml', 'w')
+      @file = File.new('/tmp/output.xml', 'w')
 
       @root = nil
       @nodes = nil
