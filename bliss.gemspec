@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "bliss"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Fernando Alonso"]
-  s.date = "2012-02-28"
+  s.date = "2012-02-29"
   s.description = "streamed xml parsing tool"
   s.email = "krakatoa1987@gmail.com"
   s.extra_rdoc_files = [
@@ -47,7 +47,7 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
-      s.add_runtime_dependency(%q<eventmachine>, [">= 0"])
+      s.add_runtime_dependency(%q<eventmachine>, [">= 0.12"])
       s.add_runtime_dependency(%q<em-http-request>, [">= 0"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
@@ -55,7 +55,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<simplecov>, [">= 0"])
     else
       s.add_dependency(%q<nokogiri>, [">= 0"])
-      s.add_dependency(%q<eventmachine>, [">= 0"])
+      s.add_dependency(%q<eventmachine>, [">= 0.12"])
       s.add_dependency(%q<em-http-request>, [">= 0"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
@@ -64,7 +64,7 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<nokogiri>, [">= 0"])
-    s.add_dependency(%q<eventmachine>, [">= 0"])
+    s.add_dependency(%q<eventmachine>, [">= 0.12"])
     s.add_dependency(%q<em-http-request>, [">= 0"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
