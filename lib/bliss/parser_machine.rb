@@ -41,6 +41,8 @@ module Bliss
       EM.run do
         http = EM::HttpRequest.new(@path).get
         http.stream { |chunk|
+          chunk.force_encoding('UTF-8')
+
           @parser << chunk
 
           @bytes += chunk.length
@@ -51,6 +53,7 @@ module Bliss
             last_index = chunk.index('</ad>') + 4
             @file << chunk[0..last_index]
             @file << "</#{self.root}>"
+            @file.close
 
             EM.stop
           end
