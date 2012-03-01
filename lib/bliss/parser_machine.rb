@@ -64,7 +64,6 @@ module Bliss
               begin
                 @file << chunk[0..last_index]
                 @file << "</#{self.root}>"
-              ensure
                 @file.close
               end
             end
