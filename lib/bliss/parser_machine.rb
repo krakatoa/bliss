@@ -60,8 +60,8 @@ module Bliss
             end
           else
             if @file
-              last_index = chunk.index('</ad>') + 4
               begin
+                last_index = chunk.index('</ad>') + 4
                 @file << chunk[0..last_index]
                 @file << "</#{self.root}>"
                 @file.close
