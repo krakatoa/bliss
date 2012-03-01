@@ -76,8 +76,8 @@ module Bliss
           if @file
             @file.close
           end
-          EM.stop }
-        end
+          EM.stop
+        }
       end
     end
   end
