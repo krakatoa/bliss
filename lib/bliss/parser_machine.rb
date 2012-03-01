@@ -61,15 +61,23 @@ module Bliss
           else
             if @file
               last_index = chunk.index('</ad>') + 4
-              @file << chunk[0..last_index]
-              @file << "</#{self.root}>"
-              @file.close
+              begin
+                @file << chunk[0..last_index]
+                @file << "</#{self.root}>"
+              ensure
+                @file.close
+              end
             end
 
             EM.stop
           end
         }
-        http.callback { EM.stop }
+        http.callback {
+          if @file
+            @file.close
+          end
+          EM.stop }
+        end
       end
     end
   end
