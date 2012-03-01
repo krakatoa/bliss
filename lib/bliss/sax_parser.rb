@@ -9,6 +9,7 @@ module Bliss
       @current_node = {}
 
       @on_root = nil
+      @on_tag_open = {}
       @on_tag_close = {}
 
       @closed = false
@@ -17,6 +18,10 @@ module Bliss
 
     def on_root(&block)
       @on_root = block
+    end
+
+    def on_tag_open(element, block)
+      @on_tag_open.merge!({element => block})
     end
 
     def on_tag_close(element, block)
@@ -42,18 +47,15 @@ module Bliss
       end
 
       @depth.push(element) if @depth.last != element
+      
+      if @on_tag_open.has_key? element
+        @on_tag_open[element].call(@depth)
+      end
 
-      #puts @depth.inspect
       current = @nodes.pair_at_chain(@depth)
 
       value_at = @nodes.value_at_chain(@depth)
       
-      #if element == 'picture'
-      #  puts current.inspect
-      #  puts value_at.inspect
-      #  puts '--\n'
-      #end
-
       if current.is_a? Hash
         if value_at.is_a? NilClass
           current[element] = {}

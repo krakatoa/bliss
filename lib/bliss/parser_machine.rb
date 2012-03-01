@@ -1,13 +1,15 @@
 module Bliss
   class ParserMachine
-    def initialize(path)
+    def initialize(path, filepath=nil)
       @path = path
       
       @sax_parser = Bliss::SaxParser.new
 
       @parser = Nokogiri::XML::SAX::PushParser.new(@sax_parser)
 
-      @file = File.new('/tmp/output.xml', 'w')
+      if filepath
+        @file = File.new(filepath, 'w')
+      end
 
       @root = nil
       @nodes = nil
@@ -21,6 +23,11 @@ module Bliss
         @root = root
         block.call(root)
       }
+    end
+
+    def on_tag_open(element, &block)
+      return false if block.arity != 1
+      @sax_parser.on_tag_open(element, block)
     end
 
     def on_tag_close(element, &block)
@@ -48,12 +55,16 @@ module Bliss
           @bytes += chunk.length
           
           if not @sax_parser.is_closed?
-            @file << chunk
+            if @file
+              @file << chunk
+            end
           else
-            last_index = chunk.index('</ad>') + 4
-            @file << chunk[0..last_index]
-            @file << "</#{self.root}>"
-            @file.close
+            if @file
+              last_index = chunk.index('</ad>') + 4
+              @file << chunk[0..last_index]
+              @file << "</#{self.root}>"
+              @file.close
+            end
 
             EM.stop
           end
