@@ -1,6 +1,28 @@
 = bliss
 
-Description goes here.
+require 'rubygems'
+require 'bliss'
+
+path = 'http://www.yourdomain.com/input.xml'
+
+parser = Bliss::ParserMachine.new(path, 'output.xml')
+count = 0
+p.on_root { |root|
+  puts root
+}
+parser.on_tag_open('ad') { |depth|
+  puts depth.inspect
+}
+parser.on_tag_close('ad') { |hash|
+  count += 1
+  puts hash.inspect
+  if count == 4
+    parser.close
+  end
+}
+
+parser.parse
+puts "Root: #{parser.root}"
 
 == Contributing to bliss
  
