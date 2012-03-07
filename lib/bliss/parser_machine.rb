@@ -48,28 +48,35 @@ module Bliss
       EM.run do
         http = EM::HttpRequest.new(@path).get
         http.stream { |chunk|
-          chunk.force_encoding('UTF-8')
+          if chunk
+            chunk.force_encoding('UTF-8')
 
-          @parser << chunk
+            @parser << chunk
 
-          @bytes += chunk.length
-          
-          if not @sax_parser.is_closed?
-            if @file
-              @file << chunk
-            end
-          else
-            if @file
-              begin
-                last_index = chunk.index('</ad>') + 4
-                @file << chunk[0..last_index]
-                @file << "</#{self.root}>"
-                @file.close
-              rescue
+            @bytes += chunk.length
+            
+            if not @sax_parser.is_closed?
+              if @file
+                @file << chunk
               end
-            end
+            else
+              if @file
+                begin
+                  last_index = chunk.index('</ad>')
+                  if last_index
+                    last_index += 4
+                    @file << chunk[0..last_index]
+                    @file << "</#{self.root}>"
+                    @file.close
+                    EM.stop
+                  else
+                    @file << chunk
+                  end
+                rescue
+                end
+              end
 
-            EM.stop
+            end
           end
         }
         http.callback {
