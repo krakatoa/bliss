@@ -21,6 +21,7 @@ Jeweler::Tasks.new do |gem|
   gem.description = %Q{streamed xml parsing tool}
   gem.email = "krakatoa1987@gmail.com"
   gem.authors = ["Fernando Alonso"]
+  gem.require_paths = ["lib"]
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
