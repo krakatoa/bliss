@@ -73,6 +73,10 @@ module Bliss
                     @file << chunk
                   end
                 rescue
+                  begin
+                    @file.close
+                  rescue
+                  end
                 end
               end
 
