@@ -1,5 +1,7 @@
 module Bliss
   class ParserMachine
+    attr_writer :max_unhandled_bytes
+
     def initialize(path, filepath=nil)
       @path = path
       
@@ -27,11 +29,46 @@ module Bliss
 
     def on_tag_open(element, &block)
       return false if block.arity != 1
-      @sax_parser.on_tag_open(element, block)
+
+      overriden_block = Proc.new { |depth|
+        reset_unhandled_bytes
+        block.call(depth)
+      }
+      @sax_parser.on_tag_open(element, overriden_block)
     end
 
     def on_tag_close(element, &block)
-      @sax_parser.on_tag_close(element, block)
+      overriden_block = Proc.new { |hash|
+        reset_unhandled_bytes
+        block.call(hash)
+      }
+      @sax_parser.on_tag_close(element, overriden_block)
+    end
+
+    def wait_tag_close(element)
+      @wait_tag_close = "</#{element}>"
+    end
+
+    def reset_unhandled_bytes
+      return false if not check_unhandled_bytes?
+      @unhandled_bytes = 0
+    end
+
+    def check_unhandled_bytes
+      if @unhandled_bytes > @max_unhandled_bytes
+        self.close
+      end
+    end
+
+    def exceeded?
+      return false if not check_unhandled_bytes?
+      if @unhandled_bytes > @max_unhandled_bytes
+        return true
+      end
+    end
+
+    def check_unhandled_bytes?
+      @max_unhandled_bytes ? true : false
     end
 
     def root
@@ -43,7 +80,7 @@ module Bliss
     end
 
     def parse
-      @bytes = 0
+      reset_unhandled_bytes if check_unhandled_bytes?
 
       EM.run do
         http = EM::HttpRequest.new(@path).get
@@ -53,32 +90,25 @@ module Bliss
 
             @parser << chunk
 
-            @bytes += chunk.length
+            if check_unhandled_bytes?
+              @unhandled_bytes += chunk.length
+              check_unhandled_bytes
+            end
             
             if not @sax_parser.is_closed?
               if @file
                 @file << chunk
               end
             else
-              if @file
+              if @file and not exceeded? and @wait_tag_close
+                handle_wait_tag_close(chunk) #if @wait_tag_close
+              else
                 begin
-                  last_index = chunk.index('</ad>')
-                  if last_index
-                    last_index += 4
-                    @file << chunk[0..last_index]
-                    @file << "</#{self.root}>"
+                  if @file
                     @file.close
-                    EM.stop
-                  else
-                    @file << chunk
                   end
-                rescue
-                  begin
-                    @file.close
-                  rescue
-                  ensure
-                    EM.stop
-                  end
+                ensure
+                  EM.stop
                 end
               end
 
@@ -93,6 +123,29 @@ module Bliss
         }
       end
     end
+    
+    def handle_wait_tag_close(chunk)
+      begin
+        last_index = chunk.index(@wait_tag_close)
+        if last_index
+          last_index += 4
+          @file << chunk[0..last_index]
+          @file << "</#{self.root}>" # TODO set this by using actual depth, so all tags get closed
+          @file.close
+          EM.stop
+        else
+          @file << chunk
+        end
+      rescue
+        begin
+          @file.close
+        rescue
+        ensure
+          EM.stop
+        end
+      end
+    end
+
   end
 end
 
