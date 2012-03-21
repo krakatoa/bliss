@@ -100,18 +100,20 @@ module Bliss
                 @file << chunk
               end
             else
-              if @file and not exceeded? and @wait_tag_close
-                handle_wait_tag_close(chunk) #if @wait_tag_close
+              if exceeded?
+                #puts 'exceeded'
+                secure_close
               else
-                begin
-                  if @file
-                    @file.close
+                if @file
+                  if @wait_tag_close
+                    #puts 'handle wait'
+                    handle_wait_tag_close(chunk) #if @wait_tag_close
+                  else
+                    #puts 'secure close'
+                    secure_close
                   end
-                ensure
-                  EM.stop
                 end
               end
-
             end
           end
         }
@@ -131,18 +133,21 @@ module Bliss
           last_index += 4
           @file << chunk[0..last_index]
           @file << "</#{self.root}>" # TODO set this by using actual depth, so all tags get closed
-          @file.close
-          EM.stop
+          secure_close
         else
           @file << chunk
         end
       rescue
-        begin
-          @file.close
-        rescue
-        ensure
-          EM.stop
-        end
+        secure_close
+      end
+    end
+
+    def secure_close
+      begin
+        @file.close
+      rescue
+      ensure
+        EM.stop
       end
     end
 
