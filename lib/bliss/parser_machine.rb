@@ -97,10 +97,7 @@ module Bliss
                 end
               rescue Nokogiri::XML::SyntaxError => e
                 if e.message.include?("encoding")
-                  raise Bliss::EncodingError, "encoding error"
-                  puts "encoding error!"
-                  @sax_parser.close
-                  secure_close
+                  raise Bliss::EncodingError, "Wrong encoding given"
                 end
               end
 
@@ -125,6 +122,9 @@ module Bliss
               end
             end
           end
+        }
+        http.errback {
+          secure_close
         }
         http.callback {
           if @file
@@ -157,6 +157,7 @@ module Bliss
       rescue
       ensure
         EM.stop
+        #puts "Closed secure."
       end
     end
 
