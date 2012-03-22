@@ -88,23 +88,23 @@ module Bliss
           if chunk
             chunk.force_encoding('UTF-8')
 
+            if check_unhandled_bytes?
+              @unhandled_bytes += chunk.length
+              check_unhandled_bytes
+            end
             if not @sax_parser.is_closed?
-              
               begin
                 @parser << chunk
                 if @file
                   @file << chunk
                 end
               rescue Nokogiri::XML::SyntaxError => e
+                #puts 'encoding error'
                 if e.message.include?("encoding")
                   raise Bliss::EncodingError, "Wrong encoding given"
                 end
               end
 
-              if check_unhandled_bytes?
-                @unhandled_bytes += chunk.length
-                check_unhandled_bytes
-              end
             else
               if exceeded?
                 #puts 'exceeded'
@@ -124,9 +124,11 @@ module Bliss
           end
         }
         http.errback {
+          #puts 'errback'
           secure_close
         }
         http.callback {
+          #puts 'callback'
           if @file
             @file.close
           end
