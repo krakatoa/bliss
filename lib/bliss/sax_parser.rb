@@ -9,6 +9,7 @@ module Bliss
       @current_node = {}
 
       @on_root = nil
+
       @on_tag_open = {}
       @on_tag_close = {}
 
@@ -50,6 +51,8 @@ module Bliss
       
       if @on_tag_open.has_key? element
         @on_tag_open[element].call(@depth)
+      elsif @on_tag_open.has_key? 'default'
+        @on_tag_open['default'].call(@depth)
       end
 
       current = @nodes.pair_at_chain(@depth)

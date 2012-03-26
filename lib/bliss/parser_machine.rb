@@ -27,7 +27,7 @@ module Bliss
       }
     end
 
-    def on_tag_open(element, &block)
+    def on_tag_open(element='default', &block)
       return false if block.arity != 1
 
       overriden_block = Proc.new { |depth|
