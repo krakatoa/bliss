@@ -31,7 +31,9 @@ module Bliss
       return false if block.arity != 1
 
       overriden_block = Proc.new { |depth|
-        reset_unhandled_bytes
+        if not element == 'default'
+          reset_unhandled_bytes
+        end
         block.call(depth)
       }
       @sax_parser.on_tag_open(element, overriden_block)
