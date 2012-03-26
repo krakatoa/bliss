@@ -38,6 +38,7 @@ module Bliss
     end
 
     def start_element(element, attributes)
+      return if is_closed?
       # element_transformation
 
       if @root == nil
@@ -81,14 +82,17 @@ module Bliss
     end
 
     def characters(string)
+      return if is_closed?
       concat_content(string)
     end
 
     def cdata_block(string)
+      return if is_closed?
       concat_content(string)
     end
 
     def end_element(element, attributes=[])
+      return if is_closed?
       # element_transformation
 
       current = @nodes.pair_at_chain(@depth)
