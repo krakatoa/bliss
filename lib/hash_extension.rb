@@ -20,4 +20,16 @@ class Hash
     chain.pop
     return self.value_at_chain(chain)
   end
+
+  def recurse_hash(hash, depth)
+    hash.each_pair { |k,v|
+      if v.is_a? Hash
+        depth.push k
+        recurse_hash(v, depth)
+      else
+        puts "#{depth + [k]}: #{v.inspect}"
+      end
+    }
+    depth.pop
+  end
 end
