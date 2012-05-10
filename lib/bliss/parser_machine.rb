@@ -135,7 +135,7 @@ module Bliss
           #  @file.close
           #end
           #EM.stop
-          secure_stop
+          secure_close
         }
       end
     end
