@@ -131,8 +131,11 @@ module Bliss
           secure_close
         }
         http.callback {
-          #puts 'callback'
-          EM.stop
+          #if @file
+          #  @file.close
+          #end
+          #EM.stop
+          secure_close
         }
       end
       @file.close
