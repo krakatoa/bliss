@@ -11,6 +11,7 @@ module Bliss
 
       if filepath
         @file = File.new(filepath, 'w')
+        @file.autoclose = false
       end
 
       @root = nil
@@ -131,12 +132,10 @@ module Bliss
         }
         http.callback {
           #puts 'callback'
-          if @file
-            @file.close
-          end
           EM.stop
         }
       end
+      @file.close
     end
     
     def handle_wait_tag_close(chunk)
@@ -157,7 +156,6 @@ module Bliss
 
     def secure_close
       begin
-        @file.close
       rescue
       ensure
         EM.stop
