@@ -4,6 +4,8 @@ module Bliss
 
     TYPES = [:exist, :not_blank, :possible_values]
 
+    # TODO use depth on each constraint
+
     def initialize(field, type, possible_values=nil)
       if field.is_a? Array
         @field = field
