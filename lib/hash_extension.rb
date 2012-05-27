@@ -21,11 +21,14 @@ class Hash
     return self.value_at_chain(chain)
   end
 
-  def recurse(depth=[], &block)
+  def recurse(include_root=false, depth=[], &block)
     self.each_pair { |k,v|
       if v.is_a? Hash
+        if include_root
+          block.call(depth + [k], v)
+        end
         depth.push k
-        v.recurse(depth, &block)
+        v.recurse(include_root, depth, &block)
       else
         block.call(depth + [k], v)
         #return "#{depth + [k]}: #{v.inspect}"

@@ -1,0 +1,23 @@
+# TODO content_type = url
+---
+root:
+  ads:
+    tag_name_values: [ ads, jobs, job ]
+    ad:
+      id:
+        content_type: numeric
+      description:
+        tag_name_values: [ description, content ]
+        content_type: string
+      pictures:
+        tag_name_required: false
+        picture:
+          tag_name_required: false
+          url:
+            tag_name_required: true
+            content_type: string
+            content_format: /http:\/\/\w+/
+      url:
+        content_format: /http:\/\/\w+/
+      date:
+        content_type: date
