@@ -1,7 +1,5 @@
 module Bliss
   class Parser
-    attr_writer :max_unhandled_bytes
-
     def initialize(path, filepath=nil)
       @path = path
       
@@ -50,6 +48,11 @@ module Bliss
       @parser_machine.on_tag_close(element, overriden_block)
     end
 
+    def on_max_unhandled_bytes(bytes, &block)
+      @max_unhandled_bytes = bytes
+      @on_max_unhandled_bytes = block
+    end
+
     def wait_tag_close(element)
       @wait_tag_close = "</#{element}>"
     end
@@ -61,7 +64,11 @@ module Bliss
 
     def check_unhandled_bytes
       if @unhandled_bytes > @max_unhandled_bytes
-        self.close
+        if @on_max_unhandled_bytes
+          @on_max_unhandled_bytes.call
+          @on_max_unhandled_bytes = nil
+        end
+        #self.close
       end
     end
 
