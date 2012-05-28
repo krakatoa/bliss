@@ -1,6 +1,7 @@
 module Bliss
   class Constraint
-    attr_reader :depth, :setting, :state
+    attr_accessor :depth
+    attr_reader :setting, :state
 
     def initialize(depth, setting, params={})
       @depth = depth
@@ -19,7 +20,7 @@ module Bliss
         case @setting
           when :tag_name_required
             if hash
-              if !hash.keys.include?(@depth.last)
+              if !hash.keys.include?(@depth.split('/').last) # TODO rearrange this into regexp way
                 @state = :not_passed
               else
                 @state = :passed
@@ -60,7 +61,7 @@ module Bliss
         when :not_passed
           case @setting
             when :tag_name_required
-              [@depth.join("/"), "missing"]
+              [@depth, "missing"]
             #when :not_blank
             #  [@field.join(" or "), "blank"]
             #when :possible_values
@@ -69,7 +70,7 @@ module Bliss
         when :passed
           case @setting
             when :tag_name_required
-              [@depth.join('/'), "exists"]
+              [@depth, "exists"]
           end
       end
     end

@@ -24,8 +24,8 @@ module Bliss
 
       # TODO should set this in another way on ParserMachine, this would override preexisting on_tag_close blocks!
       format.constraints.each do |constraint|
-        self.on_tag_open(constraint.depth.join('/')) {|depth| }
-        self.on_tag_close(constraint.depth.join('/')) {|hash, depth| }
+        self.on_tag_open(constraint.depth) {|depth| }
+        self.on_tag_close(constraint.depth) {|hash, depth| }
       end
 
       # automatically add on_tag_close handlings on all depth steps
@@ -46,7 +46,7 @@ module Bliss
       }
     end
 
-    def on_tag_open(element='default', &block)
+    def on_tag_open(element='.', &block)
       return false if block.arity != 1
 
       overriden_block = Proc.new { |depth|
@@ -56,7 +56,7 @@ module Bliss
 
         # check format constraints
         @formats.each do |format|
-          format.open_tag_constraints(depth).each do |constraint|
+          format.open_tag_constraints(depth.join('/')).each do |constraint|
             constraint.run!
           end
         end
@@ -66,7 +66,7 @@ module Bliss
       @parser_machine.on_tag_open(element, overriden_block)
     end
 
-    def on_tag_close(element='default', &block)
+    def on_tag_close(element='.', &block)
       overriden_block = Proc.new { |hash, depth|
         #if not element == 'default'
           reset_unhandled_bytes
@@ -74,7 +74,7 @@ module Bliss
 
         # check format constraints
         @formats.each do |format|
-          format.close_tag_constraints(depth).each do |constraint|
+          format.close_tag_constraints(depth.join('/')).each do |constraint|
             constraint.run!(hash)
           end
         end

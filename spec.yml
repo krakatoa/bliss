@@ -1,23 +1,23 @@
 # TODO content_type = url
 ---
-root:
-  ads:
-    tag_name_values: [ ads, jobs, job ]
-    ad:
-      id:
-        content_type: numeric
-      description:
-        tag_name_values: [ description, content ]
-        content_type: string
-      pictures:
+trovit:
+  tag_name_values: [ root, trovit, sumavisos ]
+  ad:
+    id:
+      content_type: numeric
+    description:
+      tag_name_values: [ description, content ]
+      content_type: string
+    pictures:
+      tag_name_required: false
+      picture:
         tag_name_required: false
-        picture:
-          tag_name_required: false
-          url:
-            tag_name_required: true
-            content_type: string
-            content_format: /http:\/\/\w+/
-      url:
-        content_format: /http:\/\/\w+/
-      date:
-        content_type: date
+        picture_url:
+          tag_name_required: true
+          tag_name_values: [ url, picture_url ]
+          content_type: string
+          content_format: /http:\/\/\w+/
+    url:
+      content_format: /http:\/\/\w+/
+    date:
+      content_type: date
