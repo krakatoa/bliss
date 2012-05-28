@@ -21,8 +21,9 @@ module Bliss
 
     def constraints
       return [] if not (@specs.is_a? Hash and @specs.size > 0)
+      return @constraints if @constraints
 
-      constraints = []
+      @constraints = []
 
       @specs.recurse(true) do |depth, value|
         if !@@keywords.include?(depth.last)
@@ -31,7 +32,7 @@ module Bliss
         if settings
           settings.merge!({"tag_name_required" => true}) if not settings.has_key?("tag_name_required")
 
-          puts settings.inspect
+          #puts settings.inspect
 
           # tag_name_required constraint:
 
@@ -39,59 +40,61 @@ module Bliss
             case setting
               when "tag_name_required"
                 if value == true
-                  constraints.push(Bliss::Constraint.new(depth, :tag_name_required))
+                  @constraints.push(Bliss::Constraint.new(depth, :tag_name_required))
                 end
             end
           }
 
-          #required_fields.each do |field|
-          #  constraints.concat(Sumavisos::Parsers::Constraint.build_constraint(field, [:exist, :not_blank]).dup)
-          #end
+          # check tag_name_values setting: OR on tag_name_required constraint
 
-          ###
-
-          #puts "#{depth.join('/')}: #{settings.inspect}"
+          puts "#{depth.join('/')}: #{settings.inspect}"
         end
       end
 
-      puts constraints.inspect
+      #puts @constraints.inspect
       
-      return constraints
+      return @constraints
     end
-    
-    # during parsing
-    # Sumavisos::Parsers::Validator.check_constraints(ad, constraints.select{|c| [:not_checked, :passed].include?(c.state)})
 
-    # @constraints.select{|c| c.state == :not_passed }.collect(&:detail)
-    
-    def ad_constraints(root, vertical)
-      #required_fields = Sumavisos::Parsers::Validator::FIELDS['all']['required'].dup
-      #required_fields.concat(Sumavisos::Parsers::Validator::FIELDS[vertical]['required'])
-      
-      #constraints = []
-      #required_fields.each do |field|
-      #  constraints.concat(Sumavisos::Parsers::Constraint.build_constraint(field, [:exist, :not_blank]).dup)
-      #end
-
-      if vertical == 'property'
-        constraints.concat(Sumavisos::Parsers::Constraint.build_constraint(['type'], [:possible_values], Sumavisos::Parsers::Validator::VALID_PROPERTY_TYPES).dup)
+    def open_tag_constraints(depth)
+      # raise error if not depth.is_a? Array
+      begin
+        to_check_constraints = self.to_check_constraints.select {|c| [:tag_name_required].include?(c.setting) }.select {|c| (c.depth == depth) }
+      rescue
+        []
       end
-
-      constraints
     end
 
-    def check_constraints(ads, constraints)
-      errors = []
-
-      ads = [ads] if not ads.is_a? Array
-
-      ads.each do |ad|
-        constraints.each do |constraint|
-          constraint.run!(ad)
-        end
+    def close_tag_constraints(depth)
+      # raise error if not depth.is_a? Array
+      begin
+        to_check_constraints = self.to_check_constraints.select {|c| (c.depth - [c.depth[-1]]) == depth }
+      rescue
+        []
       end
-
-      return errors
     end
+
+    # constraint set model? constraints.valid.with_depth(['root', 'ads']) ???
+    def to_check_constraints
+      # raise error if not depth.is_a? Array
+      begin
+        to_check_constraints = constraints.select {|c| [:not_checked, :passed].include?(c.state) }
+        to_check_constraints
+      rescue
+        []
+      end
+    end
+
+    def details
+      @constraints.collect(&:detail)
+    end
+
+    def error_details
+      @constraints.select {|c| c.state == :not_passed }.collect(&:detail)
+    end
+
+    # reset_constraints_state
+    # build_constraints
+
   end
 end

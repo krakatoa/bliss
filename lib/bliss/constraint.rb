@@ -1,9 +1,6 @@
 module Bliss
   class Constraint
-    #attr_reader :field, :type, :state
     attr_reader :depth, :setting, :state
-
-    #TYPES = [:exist, :not_blank, :possible_values]
 
     def initialize(depth, setting, params={})
       @depth = depth
@@ -12,19 +9,8 @@ module Bliss
       @state = :not_checked
     end
 
-    #def initialize(field, type, possible_values=nil)
-    #  if field.is_a? Array
-    #    @field = field
-    #  else
-    #    @field = [field]
-    #  end
-    #  @type = type
-    #  @possible_values = possible_values
-    #
-    #  @state = :not_checked
-    #end
-
-    def run!(hash)
+    # TODO should exist another method passed! for tag_name_required ?
+    def run!(hash=nil)
       @state = :not_checked
       #@field.each do |field|
         #if @state == :passed
@@ -32,8 +18,12 @@ module Bliss
         #end
         case @setting
           when :tag_name_required
-            if !hash.keys.include?(depth.last)
-              @state = :not_passed
+            if hash
+              if !hash.keys.include?(@depth.last)
+                @state = :not_passed
+              else
+                @state = :passed
+              end
             else
               @state = :passed
             end
@@ -54,16 +44,33 @@ module Bliss
       @state
     end
 
+    def ended!
+      case @setting
+        when :tag_name_required
+          if @state == :not_checked
+            @state = :not_passed
+          end
+      end
+    end
+
     def detail
-      if @state == :not_passed
-        detail = case @type
-          when :tag_name_required
-            [@field.join(" or "), "missing"]
-          #when :not_blank
-          #  [@field.join(" or "), "blank"]
-          #when :possible_values
-          #  [@field.join(" or "), "invalid"]
-        end
+      self.ended!
+
+      case @state
+        when :not_passed
+          case @setting
+            when :tag_name_required
+              [@depth.join("/"), "missing"]
+            #when :not_blank
+            #  [@field.join(" or "), "blank"]
+            #when :possible_values
+            #  [@field.join(" or "), "invalid"]
+          end
+        when :passed
+          case @setting
+            when :tag_name_required
+              [@depth.join('/'), "exists"]
+          end
       end
     end
 
