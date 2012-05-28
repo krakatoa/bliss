@@ -58,16 +58,22 @@ module Bliss
             @constraints.push(Bliss::Constraint.new(depth_name, cc.setting))
           }
 
+          # check tag_name_values setting: OR on tag_name_required constraint
+
+          puts "#{depth.join('/')}: #{settings.inspect}"
         end
       end
 
+      #puts @constraints.inspect
+      
       return @constraints
     end
 
     def open_tag_constraints(depth)
       # raise error if not depth.is_a? Array
       begin
-        to_check_constraints = self.to_check_constraints.select {|c| [:tag_name_required].include?(c.setting) }.select {|c| Regexp.new(c.depth).match(depth) }
+        #to_check_constraints = self.to_check_constraints.select {|c| [:tag_name_required].include?(c.setting) }.select {|c| Regexp.new(c.depth).match(depth) }
+        to_check_constraints = self.to_check_constraints.select {|c| [:tag_name_required].include?(c.setting) }.select {|c| (c.depth == depth) }
       rescue
         []
       end
@@ -76,7 +82,8 @@ module Bliss
     def close_tag_constraints(depth)
       # raise error if not depth.is_a? Array
       begin
-        to_check_constraints = self.to_check_constraints.select {|c| Regexp.new(c.depth.split('/')[0..-2].join('/')).match(depth) }
+        #to_check_constraints = self.to_check_constraints.select {|c| Regexp.new(c.depth.split('/')[0..-2].join('/')).match(depth) }
+        to_check_constraints = self.to_check_constraints.select {|c| (c.depth - [c.depth[-1]]) == depth }
       rescue
         []
       end
