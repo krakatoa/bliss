@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "bliss"
-  s.version = "0.0.8"
+  s.version = "0.0.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Fernando Alonso"]
-  s.date = "2012-03-26"
+  s.date = "2012-05-28"
   s.description = "streamed xml parsing tool"
   s.email = "krakatoa1987@gmail.com"
   s.extra_rdoc_files = [
@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    "CHANGELOG.rdoc",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
@@ -28,11 +29,16 @@ Gem::Specification.new do |s|
     "hash.rb",
     "http-machine.rb",
     "lib/bliss.rb",
+    "lib/bliss/constraint.rb",
     "lib/bliss/encoding_error.rb",
+    "lib/bliss/format.rb",
     "lib/bliss/parser.rb",
     "lib/bliss/parser_machine.rb",
-    "lib/bliss/sax_parser.rb",
     "lib/hash_extension.rb",
+    "spec.yml",
+    "spec/format_spec.rb",
+    "spec/site_spec.rb",
+    "spec/spec_helper.rb",
     "test.rb",
     "test/helper.rb",
     "test/test_bliss.rb"
@@ -50,16 +56,16 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<nokogiri>, [">= 1.5.2"])
       s.add_runtime_dependency(%q<eventmachine>, [">= 1.0.0.beta.4"])
       s.add_runtime_dependency(%q<em-http-request>, [">= 1.0.2"])
-      s.add_development_dependency(%q<shoulda>, [">= 0"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
+      s.add_development_dependency(%q<rspec>, ["~> 2.8.0"])
+      s.add_development_dependency(%q<bundler>, ["~> 1.1.3"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<simplecov>, [">= 0"])
     else
       s.add_dependency(%q<nokogiri>, [">= 1.5.2"])
       s.add_dependency(%q<eventmachine>, [">= 1.0.0.beta.4"])
       s.add_dependency(%q<em-http-request>, [">= 1.0.2"])
-      s.add_dependency(%q<shoulda>, [">= 0"])
-      s.add_dependency(%q<bundler>, ["~> 1.0.0"])
+      s.add_dependency(%q<rspec>, ["~> 2.8.0"])
+      s.add_dependency(%q<bundler>, ["~> 1.1.3"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<simplecov>, [">= 0"])
     end
@@ -67,8 +73,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<nokogiri>, [">= 1.5.2"])
     s.add_dependency(%q<eventmachine>, [">= 1.0.0.beta.4"])
     s.add_dependency(%q<em-http-request>, [">= 1.0.2"])
-    s.add_dependency(%q<shoulda>, [">= 0"])
-    s.add_dependency(%q<bundler>, ["~> 1.0.0"])
+    s.add_dependency(%q<rspec>, ["~> 2.8.0"])
+    s.add_dependency(%q<bundler>, ["~> 1.1.3"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
     s.add_dependency(%q<simplecov>, [">= 0"])
   end
