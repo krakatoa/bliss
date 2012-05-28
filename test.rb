@@ -14,6 +14,7 @@ p.wait_tag_close('ad')
 f = Bliss::Format.new
 
 p.add_format(f)
+
 p.on_tag_close('ad') { |hash, depth|
   if hash.has_key?('make')
     @makes += 1
