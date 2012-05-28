@@ -32,18 +32,20 @@ module Bliss
       return false if block.arity != 1
 
       overriden_block = Proc.new { |depth|
-        if not element == 'default'
+        #if not element == 'default'
           reset_unhandled_bytes
-        end
+        #end
         block.call(depth)
       }
       @parser_machine.on_tag_open(element, overriden_block)
     end
 
-    def on_tag_close(element, &block)
-      overriden_block = Proc.new { |hash|
-        reset_unhandled_bytes
-        block.call(hash)
+    def on_tag_close(element='default', &block)
+      overriden_block = Proc.new { |hash, depth|
+        #if not element == 'default'
+          reset_unhandled_bytes
+        #end
+        block.call(hash, depth)
       }
       @parser_machine.on_tag_close(element, overriden_block)
     end

@@ -1,0 +1,10 @@
+== 0.0.9
+
+* Features
+
+  * on_tag_close maybe used without a specific tag name, and block now handles "current depth" array.
+  * Featuring changelog
+
+* Bugfixes
+
+  * When XML is too small, it ended through http.callback block, and did not closed the file. That lead to errors and is fixed in this version.

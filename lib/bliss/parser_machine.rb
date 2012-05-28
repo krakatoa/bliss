@@ -109,7 +109,9 @@ module Bliss
       @current_content = ''
       
       if @on_tag_close.has_key? element
-        @on_tag_close[element].call(value_at)
+        @on_tag_close[element].call(value_at, @depth)
+      elsif @on_tag_close.has_key? 'default'
+        @on_tag_close['default'].call(value_at, @depth)
       end
 
       @depth.pop if @depth.last == element
