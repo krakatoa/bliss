@@ -16,10 +16,30 @@ module Bliss
 
       @root = nil
       @nodes = nil
+      @formats = []
 
       on_root {}
     end
 
+    def add_format(format)
+      @formats.push(format)
+
+      # TODO should set this in another way on ParserMachine, this would override preexisting on_tag_close blocks!
+      format.constraints.each do |constraint|
+        self.on_tag_open(constraint.depth.join('/')) {|depth| }
+        self.on_tag_close(constraint.depth.join('/')) {|hash, depth| }
+      end
+
+      # automatically add on_tag_close handlings on all depth steps
+    end
+
+    def formats_details
+      @formats.each do |format|
+        puts format.details.inspect
+      end
+    end
+
+    # deprecate this, use depth at on_tag_open or on_tag_close instead
     def on_root(&block)
       return false if not block.is_a? Proc
       @parser_machine.on_root { |root|
@@ -35,6 +55,14 @@ module Bliss
         #if not element == 'default'
           reset_unhandled_bytes
         #end
+        
+        # check format constraints
+        @formats.each do |format|
+          format.open_tag_constraints(depth).each do |constraint|
+            constraint.run!
+          end
+        end
+
         block.call(depth)
       }
       @parser_machine.on_tag_open(element, overriden_block)
@@ -45,6 +73,14 @@ module Bliss
         #if not element == 'default'
           reset_unhandled_bytes
         #end
+        
+        # check format constraints
+        @formats.each do |format|
+          format.close_tag_constraints(depth).each do |constraint|
+            constraint.run!(hash)
+          end
+        end
+
         block.call(hash, depth)
       }
       @parser_machine.on_tag_close(element, overriden_block)

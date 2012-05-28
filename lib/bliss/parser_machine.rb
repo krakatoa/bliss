@@ -50,8 +50,16 @@ module Bliss
 
       @depth.push(element) if @depth.last != element
       
-      if @on_tag_open.has_key? element
-        @on_tag_open[element].call(@depth)
+      # TODO search on hash with xpath style
+      # for example:
+      # keys: */ad/url
+      # keys: root/ad/url
+      # @on_tag_close.keys.select {|key| @depth.match(key)}
+      ##
+      search_key = @depth.join('/') # element
+
+      if @on_tag_open.has_key? search_key
+        @on_tag_open[search_key].call(@depth)
       elsif @on_tag_open.has_key? 'default'
         @on_tag_open['default'].call(@depth)
       end
@@ -107,9 +115,17 @@ module Bliss
         end
       end
       @current_content = ''
-      
-      if @on_tag_close.has_key? element
-        @on_tag_close[element].call(value_at, @depth)
+
+      # TODO search on hash with xpath style
+      # for example:
+      # keys: */ad/url
+      # keys: root/ad/url
+      # @on_tag_close.keys.select {|key| @depth.match(key)}
+      ##
+      search_key = @depth.join('/') # element
+
+      if @on_tag_close.has_key? search_key
+        @on_tag_close[search_key].call(value_at, @depth)
       elsif @on_tag_close.has_key? 'default'
         @on_tag_close['default'].call(value_at, @depth)
       end
