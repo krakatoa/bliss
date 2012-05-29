@@ -100,9 +100,9 @@ module Bliss
     def error_details
       @constraints.select {|c| c.state == :not_passed }.collect(&:detail)
     end
-
+    
     # reset_constraints_state
     # build_constraints
-
+    
   end
 end

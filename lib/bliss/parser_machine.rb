@@ -97,7 +97,7 @@ module Bliss
       @open_tag_regexps = @on_tag_open.keys.collect {|key| Regexp.new(key) }
       @open_tag_regexps
     end
-
+    
     def close_tag_regexps
       return @close_tag_regexps if @close_tag_regexps
 
@@ -139,7 +139,11 @@ module Bliss
       # keys: root/ad/url
       # @on_tag_close.keys.select {|key| @depth.match(key)}
       ##
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> 664af81cca6151268ae09dd930305c0ba9ed1dc0
       search_key = @depth.join('/') # element
       @on_tag_close.keys.select{ |r| search_key.match(r) }.each do |reg|
         @on_tag_close[reg].call(value_at, @depth)

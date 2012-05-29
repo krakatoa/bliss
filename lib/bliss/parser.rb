@@ -71,7 +71,7 @@ module Bliss
         #if not element == 'default'
           reset_unhandled_bytes
         #end
-
+        
         # check format constraints
         @formats.each do |format|
           format.close_tag_constraints(depth.join('/')).each do |constraint|
