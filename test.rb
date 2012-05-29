@@ -1,5 +1,39 @@
 require 'rubygems'
 require 'bliss'
 
-p = Bliss::ParserMachine.new('dummy')
-p.parse
+#p = Bliss::Parser.new('http://www.topdiffusion.com/flux/topdiffusion_adsdeck.xml')
+p = Bliss::Parser.new('http://www.torre18.com.mx/trovit.xml', 'output.xml')
+p.wait_tag_close('ad')
+p.on_max_unhandled_bytes(20000) {
+  puts 'Reached Max Unhandled Bytes'
+  p.close
+}
+
+@count = 0
+
+p.on_tag_close('ad') { |hash, depth|
+  @count += 1
+}
+
+=begin
+p.on_tag_close('ad') { |hash|
+  count += 1
+
+  dict = {"make"=>"name"}
+  only_in_dict = false
+  hash = hash.inject({}) { |h,v| key = dict.invert[v[0]]; key ||= v[0] unless only_in_dict; h[key] = v[1] if key; h }
+  
+  #puts hash.keys.inspect
+  if count == 100
+    p.close
+  end
+}
+=end
+
+begin
+  p.parse
+rescue Bliss::EncodingError
+  puts "Encoding Error!"
+end
+
+puts @count
