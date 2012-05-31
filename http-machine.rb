@@ -6,9 +6,7 @@ require 'em-http-request'
 @io_read, @io_write = IO.pipe
 
 EM.run do
-  #url = 'http://www.universobit.com.ar/AvisosUniversobit/trovit/AvisosUniversobit_1.xml'
-  #url = 'http://www.aestrenar.com.ar/backend/rssAestrenar.xml'
-  url = 'http://procarnet.es/feed/sumavisos/sumavisos.xml'
+  url = ''
 
   http = EM::HttpRequest.new(url).get
   http.stream { |chunk|
@@ -17,6 +15,7 @@ EM.run do
       EM.stop
     else
       @io_write << chunk
+      puts chunk
       @bytes += chunk.length
     end
   }

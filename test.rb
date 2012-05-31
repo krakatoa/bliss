@@ -1,18 +1,25 @@
 require 'rubygems'
 require 'bliss'
 
-#p = Bliss::Parser.new('http://www.topdiffusion.com/flux/topdiffusion_adsdeck.xml')
-p = Bliss::Parser.new('http://www.torre18.com.mx/trovit.xml', 'output.xml')
+p = Bliss::Parser.new('', 'output.xml')
 p.wait_tag_close('ad')
-p.on_max_unhandled_bytes(20000) {
-  puts 'Reached Max Unhandled Bytes'
-  p.close
-}
+#p.on_max_unhandled_bytes(20000) {
+#  puts 'Reached Max Unhandled Bytes'
+#  p.close
+#}
 
 @count = 0
+@makes = 0
 
 p.on_tag_close('ad') { |hash, depth|
+  if hash.has_key?('make')
+    @makes += 1
+  end
   @count += 1
+
+  if @count == 600
+    p.close
+  end
 }
 
 =begin
@@ -37,3 +44,4 @@ rescue Bliss::EncodingError
 end
 
 puts @count
+puts @makes
