@@ -107,7 +107,6 @@ module Bliss
             end
           end
         end
-        puts compression
         
         http.stream { |chunk|
           if chunk
