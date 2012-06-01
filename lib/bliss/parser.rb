@@ -96,6 +96,10 @@ module Bliss
 
       EM.run do
         http = EM::HttpRequest.new(@path).get
+        
+        @autodetect_compression = true
+        compression = autodetect_compression(http)
+        
         http.stream { |chunk|
           if chunk
             chunk.force_encoding('UTF-8')
@@ -106,6 +110,10 @@ module Bliss
             end
             if not @parser_machine.is_closed?
               begin
+                case compression
+                  when :gzip
+                    chunk = @zstream.inflate(chunk)
+                end
                 @push_parser << chunk
                 if @file
                   @file << chunk
@@ -149,6 +157,17 @@ module Bliss
       end
       file_close
     end
+
+    def autodetect_compression(http)
+      compression = :none
+      http.headers do
+        if (/^attachment.+filename.+\.gz/i === http.response_header['CONTENT_DISPOSITION']) or http.response_header.compressed? or ["application/octet-stream", "application/x-gzip"].include? http.response_header['CONTENT_TYPE']
+          @zstream = Zlib::Inflate.new(Zlib::MAX_WBITS+16)
+          compression = :gzip
+        end
+      end
+      return compression
+    end
     
     def handle_wait_tag_close(chunk)
       begin
@@ -174,6 +193,9 @@ module Bliss
 
     def secure_close
       begin
+        if @zstream
+          @zstream.close
+        end
       rescue
       ensure
         EM.stop

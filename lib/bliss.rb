@@ -1,6 +1,7 @@
 require 'nokogiri'
 require 'eventmachine'
 require 'em-http-request'
+require 'zlib'
 
 require 'hash_extension'
 
