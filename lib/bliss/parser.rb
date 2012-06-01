@@ -122,6 +122,7 @@ module Bliss
                 case compression
                   when :gzip
                     chunk = @zstream.inflate(chunk)
+                    chunk.force_encoding('UTF-8')
                 end
                 @push_parser << chunk
                 if @file
