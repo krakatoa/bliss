@@ -3,10 +3,9 @@ require 'bliss'
 
 p = Bliss::Parser.new('', 'output.xml')
 p.wait_tag_close('ad')
-#p.on_max_unhandled_bytes(20000) {
-#  puts 'Reached Max Unhandled Bytes'
-#  p.close
-#}
+p.on_max_unhandled_bytes(20000) {
+  puts 'Unhandled bytes!'
+}
 
 @count = 0
 @makes = 0
