@@ -4,60 +4,33 @@ require 'spec_helper'
 
 describe Bliss::Format do
   before do
-    #@openx_banner = mock(OpenX::Services::Banner)
     @format = Bliss::Format.new
   end
 
   describe '.constraints' do
-    #before do
-    #end
-    
     it 'should do it' do
       @format.constraints.size.should == 8
     end
   end
 
-  #describe '.traffic' do
-  #  before do
-  #    @openx_banner.stub(:statistics) { YAML.load_file('spec/fixtures/openx_banner_statistics.yml') }
-  #    OpenX::Services::Banner.should_receive(:find).with(1).and_return(@openx_banner)
-  #    @banner = Banner.new(1)
-  #  end
+  describe '#settings_to_constraints' do
+    it 'should return an array with a Bliss::Constraint object' do
+      constraints = Bliss::Format.settings_to_constraints(['root'], {'tag_name_required' => true})
+      constraints.should be_a(Array)
+      constraints.size.should == 1
+      constraints.first.should be_a(Bliss::Constraint)
+    end
 
-  #  it 'should return statistics' do
-  #    @banner.traffic(Date.today, Date.today).should be_kind_of(Hash)
-  #  end
-  #end
+    it 'should have depth and setting loaded' do
+      constraints = Bliss::Format.settings_to_constraints(['root'], {'tag_name_required' => true})
+      constraints.first.depth.should == 'root'
+      constraints.first.setting.should == :tag_name_required
+    end
 
-  # describe '.created' do
-  #   context 'when last creation is less than 2 days ago' do
-  #     before do
-  #       @site.stub(:last_creation_day_in_week) { Date.today - 1 }
-  #     end
-
-  #     it 'should be ok' do
-  #       @site_evaluation.created[@site.id]['created'][0].should == 'ok'
-  #     end
-  #   end
-
-  #   context 'when last creation is between 2 and 7 days ago' do
-  #     before do
-  #       @site.stub(:last_creation_day_in_week) { Date.today - 3 }
-  #     end
-
-  #     it 'should be a warning' do
-  #       @site_evaluation.created[@site.id]['created'][0].should == 'warning'
-  #     end
-  #   end
-
-  #   context 'when last creation is more than 7 days ago' do
-  #     before do
-  #       @site.stub(:last_creation_day_in_week) { Date.today - 8 }
-  #     end
-
-  #     it 'should be an alert' do
-  #       @site_evaluation.created[@site.id]['created'][0].should == 'alert'
-  #     end
-  #   end
-  # end
+    it 'should have multiple depths' do
+      constraints = Bliss::Format.settings_to_constraints(['root'], {'tag_name_required' => true, 'tag_name_values' => ['root', 'ROOT']})
+      constraints.first.depth.should == '(root|ROOT)'
+      constraints.first.setting.should == :tag_name_required
+    end
+  end
 end

@@ -26,42 +26,56 @@ module Bliss
       @constraints = []
 
       @specs.recurse(true) do |depth, value|
-        if !@@keywords.include?(depth.last)
-          settings = @specs.value_at_chain(depth).select{|key| @@keywords.include?(key) }
+        if value.is_a? Hash and !@@keywords.include?(depth.last)
+          settings = value.select { |key| @@keywords.include?(key) }
         end
-        if settings
+        #settings = @specs.value_at_chain(depth).select{|key| @@keywords.include?(key) }
+        if settings.is_a? Hash and !@@keywords.include?(depth.last)
           settings.merge!({"tag_name_required" => true}) if not settings.has_key?("tag_name_required")
 
-          # TODO this is an ugly to move tag_name_values to the end!
+          # TODO this is an ugly way to move tag_name_values to the end!
           settings.store('tag_name_values', settings.delete('tag_name_values')) if settings.has_key?('tag_name_values')
 
           #puts settings.inspect
 
-          depth_name = nil
-          current_constraints = []
-          #puts "#{depth.join('/')}: #{settings.inspect}"
-          settings.each_pair { |setting, value|
-            case setting
-              when "tag_name_required"
-                if value == true
-                  depth_name ||= depth.join('/')
-                  current_constraints.push(Bliss::Constraint.new(depth_name, :tag_name_required))
-                end
-              when "tag_name_values"
-                depth_name = depth[0..-2].join('/')
-                depth_name << "/" if depth_name.size > 0
-                depth_name << "(#{value.join('|')})" # TODO esto funciona solo en el ultimo step del depth :/
-            end
-          }
-          current_constraints.each { |cc|
-            cc.depth = depth_name
-            @constraints.push(Bliss::Constraint.new(depth_name, cc.setting))
-          }
+          #depth_name = nil
+          #setting_to_constraints(depth, settings).each { |cc|
+            #cc.depth = depth_name
+          #  @constraints.push(cc) #Bliss::Constraint.new(depth_name, cc.setting))
+          #}
+          @constraints.concat(Bliss::Format.settings_to_constraints(depth, settings))
 
         end
       end
 
       return @constraints
+    end
+
+    def self.settings_to_constraints(depth, settings)
+      # TODO perhaps the Constraint model should handle this
+      # e.g., constraint.add_depth (as array)
+      # then internally it creates xpath-like depth
+
+      current_constraints = []
+      depth_name = nil
+      #puts "#{depth.join('/')}: #{settings.inspect}"
+      settings.each_pair { |setting, value|
+        case setting
+          when "tag_name_required"
+            if value == true
+              depth_name ||= depth.join('/')
+              current_constraints.push(Bliss::Constraint.new(depth_name, :tag_name_required))
+            end
+          when "tag_name_values"
+            depth_name = depth[0..-2].join('/')
+            depth_name << "/" if depth_name.size > 0
+            depth_name << "(#{value.join('|')})" # TODO esto funciona solo en el ultimo step del depth :/
+        end
+      }
+      current_constraints.each {|cc|
+        cc.depth = depth_name
+      }
+      current_constraints
     end
 
     def open_tag_constraints(depth)
