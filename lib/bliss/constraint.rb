@@ -59,13 +59,13 @@ module Bliss
       case @setting
         when :tag_name_required
           if @state == :not_checked
-            #@state = :not_passed
+            @state = :not_passed
           end
       end
     end
 
     def detail
-      self.ended!
+      self.ended! # TODO esto es una chota de codigo groncho!
 
       case @state
         when :not_passed

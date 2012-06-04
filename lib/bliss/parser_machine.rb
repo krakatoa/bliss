@@ -166,7 +166,7 @@ module Bliss
       #puts @constraints.collect(&:state).inspect
 
       @constraints.select{|c| [:not_checked, :passed].include?(c.state) }.select {|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$")) }.each do |constraint|
-        #puts "search_key: #{search_key}"
+        puts "search_key: #{search_key}"
         #puts "value_at.inspect: #{value_at.inspect}"
         #puts "current.inspect: #{current.inspect}"
 
