@@ -3,26 +3,30 @@
   require 'rubygems'
   require 'bliss'
 
-  path = 'http://www.yourdomain.com/input.xml'
+  path = 'http://www.yourdomain.com/input.xml' # it supports tar.gz too!
 
-  parser = Bliss::ParserMachine.new(path, 'output.xml')
+  parser = Bliss::Parser.new(path, 'output.xml') # outputs read xml
   count = 0
-  p.on_root { |root|
-    puts root
+  parser.on_max_unhandled_bytes(20000) {
+    puts 'Stopped parsing caused content data for tag was too big!'
+    parser.close
   }
-  parser.on_tag_open('ad') { |depth|
+  parser.on_tag_open('ads/ad') { |depth|
     puts depth.inspect
   }
-  parser.on_tag_close('ad') { |hash|
+  parser.on_tag_close('ads/ad') { |hash, depth|
     count += 1
     puts hash.inspect
     if count == 4
       parser.close
     end
   }
+
+  parser.on_timeout(5) {
+    puts 'Timeout!'
+  }
   
   parser.parse
-  puts "Root: #{parser.root}"
 
 == Contributing to bliss
  
