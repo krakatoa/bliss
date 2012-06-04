@@ -21,21 +21,10 @@ module Bliss
 
     def add_format(format)
       @formats.push(format)
-
-      # TODO should set this in another way on ParserMachine, this would override preexisting on_tag_close blocks!
-
-      #format.constraints.each do |constraint|
-      #  self.on_tag_open(constraint.depth) {|depth| }
-      #  self.on_tag_close(constraint.depth) {|hash, depth| }
-      #end
     end
 
     def load_constraints_on_parser_machine
       @parser_machine.constraints(@formats.collect(&:constraints).flatten)
-      #format.constraints.each do |constraint|
-      #  self.on_tag_open(constraint.depth) {|depth| }
-      #  self.on_tag_close(constraint.depth) {|hash, depth| }
-      #end
     end
 
     def formats_details
@@ -61,13 +50,6 @@ module Bliss
           reset_unhandled_bytes
         end
 
-        # check format constraints
-        #@formats.each do |format|
-        #  format.open_tag_constraints(depth.join('/')).each do |constraint|
-        #    constraint.run!
-        #  end
-        #end
-
         block.call(depth)
       }
       @parser_machine.on_tag_open(element, overriden_block)
@@ -75,16 +57,7 @@ module Bliss
 
     def on_tag_close(element='.', &block)
       overriden_block = Proc.new { |hash, depth|
-        #if not element == 'default'
-          reset_unhandled_bytes
-        #end
-
-        # check format constraints
-        #@formats.each do |format|
-        #  format.close_tag_constraints(depth.join('/')).each do |constraint|
-        #    constraint.run!(hash)
-        #  end
-        #end
+        reset_unhandled_bytes
 
         block.call(hash, depth)
       }
@@ -111,7 +84,6 @@ module Bliss
           @on_max_unhandled_bytes.call
           @on_max_unhandled_bytes = nil
         end
-        #self.close
       end
     end
 
@@ -211,12 +183,6 @@ module Bliss
       file_close
     end
 
-    def autodetect_compression(http)
-      #compression = :none
-      puts compression
-      return compression
-    end
-    
     def handle_wait_tag_close(chunk)
       begin
         last_index = chunk.index(@wait_tag_close)
@@ -253,9 +219,3 @@ module Bliss
 
   end
 end
-
-#require 'stringio'
-#str = StringIO.new
-#z = Zlib::GzipWriter.new(str)
-#z.write(txt)
-#z.close

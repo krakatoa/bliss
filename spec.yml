@@ -2,7 +2,7 @@
 ---
 trovit:
   tag_name_values: [ root, trovit, sumavisos ]
-  ad:
+  ad: &ad
     id:
       content_type: numeric
     description:
@@ -21,3 +21,7 @@ trovit:
       content_format: /http:\/\/\w+/
     date:
       content_type: date
+  ads:
+    tag_name_required: false
+    ad:
+      <<: *ad
