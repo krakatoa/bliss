@@ -69,6 +69,11 @@ module Bliss
       @on_max_unhandled_bytes = block
     end
 
+    def on_timeout(seconds, &block)
+      @timeout = seconds
+      @on_timeout = block
+    end
+
     def wait_tag_close(element)
       @wait_tag_close = "</#{element}>"
     end
@@ -111,7 +116,12 @@ module Bliss
       load_constraints_on_parser_machine
 
       EM.run do
-        http = EM::HttpRequest.new(@path).get
+        http = nil
+        if @timeout
+          http = EM::HttpRequest.new(@path, :connect_timeout => @timeout, :inactivity_timeout => @timeout).get
+        else
+          http = EM::HttpRequest.new(@path).get
+        end
         
         @autodetect_compression = true
         compression = :none
@@ -170,6 +180,9 @@ module Bliss
         }
         http.errback {
           #puts 'errback'
+          if @timeout
+            @on_timeout.call
+          end
           secure_close
         }
         http.callback {
