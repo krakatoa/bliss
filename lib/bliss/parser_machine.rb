@@ -13,8 +13,14 @@ module Bliss
       @on_tag_open = {}
       @on_tag_close = {}
 
+      @constraints = []
+
       @closed = false
 
+    end
+
+    def constraints(constraints)
+      @constraints = constraints
     end
 
     def on_root(&block)
@@ -22,11 +28,13 @@ module Bliss
     end
 
     def on_tag_open(element, block)
-      @on_tag_open.merge!({Regexp.new(element) => block})
+      @on_tag_open.merge!({Regexp.new("#{element}$") => block})
     end
 
     def on_tag_close(element, block)
-      @on_tag_close.merge!({Regexp.new(element) => block})
+      # TODO
+      # check how do we want to handle on_tag_close depths (xpath, array, another)
+      @on_tag_close.merge!({Regexp.new("#{element}$") => block})
     end
 
     def close
@@ -141,8 +149,28 @@ module Bliss
       ##
 
       search_key = @depth.join('/') # element
+      
+      if @depth.last == 'ad'
+        #puts search_key
+        #puts value_at.keys.inspect
+        #ad array #puts @constraints.select{|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$"))}.inspect
+        #puts current.keys.inspect
+        # others puts @constraints.select{|c| search_key.match(Regexp.new("#{c.depth.split('/')[0..-2].join('/')}$"))}.inspect
+      end
+
       @on_tag_close.keys.select{ |r| search_key.match(r) }.each do |reg|
         @on_tag_close[reg].call(value_at, @depth)
+      end
+      # TODO constraint should return Regexp like depth too
+
+      #puts @constraints.collect(&:state).inspect
+
+      @constraints.select{|c| [:not_checked, :passed].include?(c.state) }.select {|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$")) }.each do |constraint|
+        #puts "search_key: #{search_key}"
+        #puts "value_at.inspect: #{value_at.inspect}"
+        #puts "current.inspect: #{current.inspect}"
+
+        constraint.run!(current)
       end
 
       @depth.pop if @depth.last == element
@@ -156,7 +184,7 @@ module Bliss
     end
 
     def end_document
-      puts @nodes.inspect
+      #puts @nodes.inspect
     end
   end
 end

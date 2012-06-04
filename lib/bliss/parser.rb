@@ -23,12 +23,19 @@ module Bliss
       @formats.push(format)
 
       # TODO should set this in another way on ParserMachine, this would override preexisting on_tag_close blocks!
-      format.constraints.each do |constraint|
-        self.on_tag_open(constraint.depth) {|depth| }
-        self.on_tag_close(constraint.depth) {|hash, depth| }
-      end
 
-      # automatically add on_tag_close handlings on all depth steps
+      #format.constraints.each do |constraint|
+      #  self.on_tag_open(constraint.depth) {|depth| }
+      #  self.on_tag_close(constraint.depth) {|hash, depth| }
+      #end
+    end
+
+    def load_constraints_on_parser_machine
+      @parser_machine.constraints(@formats.collect(&:constraints).flatten)
+      #format.constraints.each do |constraint|
+      #  self.on_tag_open(constraint.depth) {|depth| }
+      #  self.on_tag_close(constraint.depth) {|hash, depth| }
+      #end
     end
 
     def formats_details
@@ -55,11 +62,11 @@ module Bliss
         end
 
         # check format constraints
-        @formats.each do |format|
-          format.open_tag_constraints(depth.join('/')).each do |constraint|
-            constraint.run!
-          end
-        end
+        #@formats.each do |format|
+        #  format.open_tag_constraints(depth.join('/')).each do |constraint|
+        #    constraint.run!
+        #  end
+        #end
 
         block.call(depth)
       }
@@ -73,11 +80,11 @@ module Bliss
         #end
 
         # check format constraints
-        @formats.each do |format|
-          format.close_tag_constraints(depth.join('/')).each do |constraint|
-            constraint.run!(hash)
-          end
-        end
+        #@formats.each do |format|
+        #  format.close_tag_constraints(depth.join('/')).each do |constraint|
+        #    constraint.run!(hash)
+        #  end
+        #end
 
         block.call(hash, depth)
       }
@@ -129,6 +136,7 @@ module Bliss
 
     def parse
       reset_unhandled_bytes if check_unhandled_bytes?
+      load_constraints_on_parser_machine
 
       EM.run do
         http = EM::HttpRequest.new(@path).get

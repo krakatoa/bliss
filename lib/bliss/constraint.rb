@@ -20,10 +20,20 @@ module Bliss
         case @setting
           when :tag_name_required
             if hash
-              if !hash.keys.include?(@depth.split('/').last) # TODO rearrange this into regexp way
-                @state = :not_passed
-              else
+              required = @depth.split('/').last.gsub('(', '').gsub(')', '').split('|')
+
+              #puts "#{@depth.inspect} - required: #{required.inspect}"
+
+              found = false
+              required.each do |key|
+                if hash.keys.include?(key)
+                  found = true
+                end
+              end
+              if found
                 @state = :passed
+              else
+                @state = :not_passed
               end
             else
               @state = :passed
@@ -49,7 +59,7 @@ module Bliss
       case @setting
         when :tag_name_required
           if @state == :not_checked
-            @state = :not_passed
+            #@state = :not_passed
           end
       end
     end
