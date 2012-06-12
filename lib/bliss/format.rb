@@ -4,9 +4,8 @@ module Bliss
   class Format
     @@keywords = %w{ tag_name_required content_required tag_name_type content_type tag_name_format content_format tag_name_values content_values  }
 
-    def initialize
-      yml = YAML.load_file('/home/fernando/desarrollo/workspace/experimentos/bliss/spec.yml')
-      self.specifications = yml
+    def initialize(filepath)
+      self.specifications = YAML.load_file(filepath)
     end
 
     # TODO for debugging only!
@@ -35,6 +34,7 @@ module Bliss
 
           # TODO this is an ugly way to move tag_name_values to the end!
           settings.store('tag_name_values', settings.delete('tag_name_values')) if settings.has_key?('tag_name_values')
+          settings.store('content_values', settings.delete('content_values')) if settings.has_key?('content_values')
 
           #puts settings.inspect
 
@@ -58,6 +58,7 @@ module Bliss
 
       current_constraints = []
       depth_name = nil
+      content_values = nil
       #puts "#{depth.join('/')}: #{settings.inspect}"
       settings.each_pair { |setting, value|
         case setting
@@ -70,6 +71,8 @@ module Bliss
             depth_name = depth[0..-2].join('/')
             depth_name << "/" if depth_name.size > 0
             depth_name << "(#{value.join('|')})" # TODO esto funciona solo en el ultimo step del depth :/
+          when "content_values"
+            current_constraints.push(Bliss::Constraint.new(depth_name, :content_values, {:possible_values => value}))
         end
       }
       current_constraints.each {|cc|

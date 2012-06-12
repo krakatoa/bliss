@@ -1,13 +1,18 @@
 module Bliss
   class Constraint
-    attr_accessor :depth
+    attr_accessor :depth, :possible_values
     attr_reader :setting, :state
 
     def initialize(depth, setting, params={})
       @depth = depth
       @setting = setting
+      @possible_values = params[:possible_values].collect(&:to_s) if params.has_key?(:possible_values)
 
       @state = :not_checked
+    end
+
+    def tag_names
+      @depth.split('/').last.gsub('(', '').gsub(')', '').split('|')
     end
 
     # TODO should exist another method passed! for tag_name_required ?
@@ -19,15 +24,15 @@ module Bliss
         #end
         case @setting
           when :tag_name_required
+            content = nil
             if hash
-              required = @depth.split('/').last.gsub('(', '').gsub(')', '').split('|')
-
               #puts "#{@depth.inspect} - required: #{required.inspect}"
 
               found = false
-              required.each do |key|
+              self.tag_names.each do |key|
                 if hash.keys.include?(key)
                   found = true
+                  break
                 end
               end
               if found
@@ -38,14 +43,26 @@ module Bliss
             else
               @state = :passed
             end
+          when :content_values
+            if hash
+              found = false
+              self.tag_names.each do |key|
+                content = hash[key]
+                puts content
+                puts @possible_values.inspect
+                if @possible_values.include?(content)
+                  found = true
+                  break
+                end
+              end
+              if found
+                @state = :passed
+              else
+                @state = :not_passed
+              end
+            end
           #when :not_blank
           #  if hash.has_key?(field) and !hash[field].to_s.empty?
-          #    @state = :passed
-          #  else
-          #    @state = :not_passed
-          #  end
-          #when :possible_values
-          #  if hash.has_key?(field) and @possible_values.include?(hash[field])
           #    @state = :passed
           #  else
           #    @state = :not_passed
