@@ -1,7 +1,12 @@
+== 0.1.0
+  * Added support for (possible) "content_values" on Bliss::Format.
+
 == 0.0.9
 
 * Features
 
+  * Added on_timeout callback.
+  * Introduced Bliss::Format, which linked to a Bliss::Parser are checked during parsing process. They are defined with a bunch of specs given as YAML.
   * added support for Gzip (content type is autodetected).
   * on_max_unhandled_bytes callback block. Which receives the amount of bytes and a block to execute when that limit is reached.
   * on_tag_close maybe used without a specific tag name, and block now handles "current depth" array.

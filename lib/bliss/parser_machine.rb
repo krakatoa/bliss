@@ -13,8 +13,14 @@ module Bliss
       @on_tag_open = {}
       @on_tag_close = {}
 
+      @constraints = []
+
       @closed = false
 
+    end
+
+    def constraints(constraints)
+      @constraints = constraints
     end
 
     def on_root(&block)
@@ -22,11 +28,13 @@ module Bliss
     end
 
     def on_tag_open(element, block)
-      @on_tag_open.merge!({element => block})
+      @on_tag_open.merge!({Regexp.new("#{element}$") => block})
     end
 
     def on_tag_close(element, block)
-      @on_tag_close.merge!({element => block})
+      # TODO
+      # check how do we want to handle on_tag_close depths (xpath, array, another)
+      @on_tag_close.merge!({Regexp.new("#{element}$") => block})
     end
 
     def close
@@ -50,10 +58,19 @@ module Bliss
 
       @depth.push(element) if @depth.last != element
       
-      if @on_tag_open.has_key? element
-        @on_tag_open[element].call(@depth)
-      elsif @on_tag_open.has_key? 'default'
-        @on_tag_open['default'].call(@depth)
+      # TODO search on hash with xpath style
+      # for example:
+      # keys: */ad/url
+      # keys: root/ad/url
+      # @on_tag_close.keys.select {|key| @depth.match(key)}
+
+      # other example:
+      # keys: root/(ad|AD)/description
+      ##
+
+      search_key = @depth.join('/') # element
+      @on_tag_open.keys.select{ |r| search_key.match(r) }.each do |reg|
+        @on_tag_open[reg].call(@depth)
       end
 
       current = @nodes.pair_at_chain(@depth)
@@ -81,6 +98,22 @@ module Bliss
       @current_content = ''
     end
 
+=begin
+    def open_tag_regexps
+      return @open_tag_regexps if @open_tag_regexps
+
+      @open_tag_regexps = @on_tag_open.keys.collect {|key| Regexp.new(key) }
+      @open_tag_regexps
+    end
+
+    def close_tag_regexps
+      return @close_tag_regexps if @close_tag_regexps
+
+      @close_tag_regexps = @on_tag_close.keys.collect {|key| Regexp.new(key) }
+      @close_tag_regexps
+    end
+=end
+
     def characters(string)
       return if is_closed?
       concat_content(string)
@@ -107,11 +140,37 @@ module Bliss
         end
       end
       @current_content = ''
+
+      # TODO search on hash with xpath style
+      # for example:
+      # keys: */ad/url
+      # keys: root/ad/url
+      # @on_tag_close.keys.select {|key| @depth.match(key)}
+      ##
+
+      search_key = @depth.join('/') # element
       
-      if @on_tag_close.has_key? element
-        @on_tag_close[element].call(value_at, @depth)
-      elsif @on_tag_close.has_key? 'default'
-        @on_tag_close['default'].call(value_at, @depth)
+      if @depth.last == 'ad'
+        #puts search_key
+        #puts value_at.keys.inspect
+        #ad array #puts @constraints.select{|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$"))}.inspect
+        #puts current.keys.inspect
+        # others puts @constraints.select{|c| search_key.match(Regexp.new("#{c.depth.split('/')[0..-2].join('/')}$"))}.inspect
+      end
+
+      @on_tag_close.keys.select{ |r| search_key.match(r) }.each do |reg|
+        @on_tag_close[reg].call(value_at, @depth)
+      end
+      # TODO constraint should return Regexp like depth too
+
+      #puts @constraints.collect(&:state).inspect
+
+      @constraints.select{|c| [:not_checked, :passed].include?(c.state) }.select {|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$")) }.each do |constraint|
+        #puts "search_key: #{search_key}"
+        #puts "value_at.inspect: #{value_at.inspect}"
+        #puts "current.inspect: #{current.inspect}"
+
+        constraint.run!(current)
       end
 
       @depth.pop if @depth.last == element
@@ -125,7 +184,7 @@ module Bliss
     end
 
     def end_document
-      puts @nodes.inspect
+      #puts @nodes.inspect
     end
   end
 end

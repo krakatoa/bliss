@@ -4,9 +4,8 @@ module Bliss
   class Format
     @@keywords = %w{ tag_name_required content_required tag_name_type content_type tag_name_format content_format tag_name_values content_values  }
 
-    def initialize
-      yml = YAML.load_file('/home/fernando/desarrollo/workspace/experimentos/bliss/spec.yml')
-      self.specifications = yml
+    def initialize(filepath)
+      self.specifications = YAML.load_file(filepath)
     end
 
     # TODO for debugging only!
@@ -21,77 +20,106 @@ module Bliss
 
     def constraints
       return [] if not (@specs.is_a? Hash and @specs.size > 0)
+      return @constraints if @constraints
 
-      constraints = []
+      @constraints = []
 
       @specs.recurse(true) do |depth, value|
-        if !@@keywords.include?(depth.last)
-          settings = @specs.value_at_chain(depth).select{|key| @@keywords.include?(key) }
+        if value.is_a? Hash and !@@keywords.include?(depth.last)
+          settings = value.select { |key| @@keywords.include?(key) }
         end
-        if settings
+        #settings = @specs.value_at_chain(depth).select{|key| @@keywords.include?(key) }
+        if settings.is_a? Hash and !@@keywords.include?(depth.last)
           settings.merge!({"tag_name_required" => true}) if not settings.has_key?("tag_name_required")
 
-          puts settings.inspect
+          # TODO this is an ugly way to move tag_name_values to the end!
+          settings.store('tag_name_values', settings.delete('tag_name_values')) if settings.has_key?('tag_name_values')
+          settings.store('content_values', settings.delete('content_values')) if settings.has_key?('content_values')
 
-          # tag_name_required constraint:
+          #puts settings.inspect
 
-          settings.each_pair { |setting, value|
-            case setting
-              when "tag_name_required"
-                if value == true
-                  constraints.push(Bliss::Constraint.new(depth, :tag_name_required))
-                end
+          #depth_name = nil
+          #setting_to_constraints(depth, settings).each { |cc|
+            #cc.depth = depth_name
+          #  @constraints.push(cc) #Bliss::Constraint.new(depth_name, cc.setting))
+          #}
+          @constraints.concat(Bliss::Format.settings_to_constraints(depth, settings))
+
+        end
+      end
+
+      return @constraints
+    end
+
+    def self.settings_to_constraints(depth, settings)
+      # TODO perhaps the Constraint model should handle this
+      # e.g., constraint.add_depth (as array)
+      # then internally it creates xpath-like depth
+
+      current_constraints = []
+      depth_name = nil
+      content_values = nil
+      #puts "#{depth.join('/')}: #{settings.inspect}"
+      settings.each_pair { |setting, value|
+        case setting
+          when "tag_name_required"
+            if value == true
+              depth_name ||= depth.join('/')
+              current_constraints.push(Bliss::Constraint.new(depth_name, :tag_name_required))
             end
-          }
-
-          #required_fields.each do |field|
-          #  constraints.concat(Sumavisos::Parsers::Constraint.build_constraint(field, [:exist, :not_blank]).dup)
-          #end
-
-          ###
-
-          #puts "#{depth.join('/')}: #{settings.inspect}"
+          when "tag_name_values"
+            depth_name = depth[0..-2].join('/')
+            depth_name << "/" if depth_name.size > 0
+            depth_name << "(#{value.join('|')})" # TODO esto funciona solo en el ultimo step del depth :/
+          when "content_values"
+            current_constraints.push(Bliss::Constraint.new(depth_name, :content_values, {:possible_values => value}))
         end
-      end
-
-      puts constraints.inspect
-      
-      return constraints
-    end
-    
-    # during parsing
-    # Sumavisos::Parsers::Validator.check_constraints(ad, constraints.select{|c| [:not_checked, :passed].include?(c.state)})
-
-    # @constraints.select{|c| c.state == :not_passed }.collect(&:detail)
-    
-    def ad_constraints(root, vertical)
-      #required_fields = Sumavisos::Parsers::Validator::FIELDS['all']['required'].dup
-      #required_fields.concat(Sumavisos::Parsers::Validator::FIELDS[vertical]['required'])
-      
-      #constraints = []
-      #required_fields.each do |field|
-      #  constraints.concat(Sumavisos::Parsers::Constraint.build_constraint(field, [:exist, :not_blank]).dup)
-      #end
-
-      if vertical == 'property'
-        constraints.concat(Sumavisos::Parsers::Constraint.build_constraint(['type'], [:possible_values], Sumavisos::Parsers::Validator::VALID_PROPERTY_TYPES).dup)
-      end
-
-      constraints
+      }
+      current_constraints.each {|cc|
+        cc.depth = depth_name
+      }
+      current_constraints
     end
 
-    def check_constraints(ads, constraints)
-      errors = []
+    #def open_tag_constraints(depth)
+    #  # raise error if not depth.is_a? Array
+    #  begin
+    #    to_check_constraints = self.to_check_constraints.select {|c| [:tag_name_required].include?(c.setting) }.select {|c| Regexp.new(c.depth).match(depth) }
+    #  rescue
+    #    []
+    #  end
+    #end
 
-      ads = [ads] if not ads.is_a? Array
+    #def close_tag_constraints(depth)
+    #  # raise error if not depth.is_a? Array
+    #  begin
+    #    to_check_constraints = self.to_check_constraints.select {|c| Regexp.new(c.depth.split('/')[0..-2].join('/')).match(depth) }
+    #  rescue
+    #    []
+    #  end
+    #end
 
-      ads.each do |ad|
-        constraints.each do |constraint|
-          constraint.run!(ad)
-        end
+    # constraint set model? constraints.valid.with_depth(['root', 'ads']) ???
+    def to_check_constraints
+      # raise error if not depth.is_a? Array
+      begin
+        to_check_constraints = constraints.select {|c| [:not_checked, :passed].include?(c.state) }
+        to_check_constraints
+      rescue
+        []
       end
-
-      return errors
     end
+
+    def details
+      @constraints.collect(&:detail)
+    end
+
+    def error_details
+      @constraints.select {|c| c.state == :not_passed }.collect(&:detail)
+    end
+
+    # reset_constraints_state
+    # build_constraints
+
   end
 end

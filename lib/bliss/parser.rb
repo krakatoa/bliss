@@ -14,10 +14,26 @@ module Bliss
 
       @root = nil
       @nodes = nil
+      @formats = []
 
       on_root {}
     end
 
+    def add_format(format)
+      @formats.push(format)
+    end
+
+    def load_constraints_on_parser_machine
+      @parser_machine.constraints(@formats.collect(&:constraints).flatten)
+    end
+
+    def formats_details
+      @formats.each do |format|
+        puts format.details.inspect
+      end
+    end
+
+    # deprecate this, use depth at on_tag_open or on_tag_close instead
     def on_root(&block)
       return false if not block.is_a? Proc
       @parser_machine.on_root { |root|
@@ -26,23 +42,23 @@ module Bliss
       }
     end
 
-    def on_tag_open(element='default', &block)
+    def on_tag_open(element='.', &block)
       return false if block.arity != 1
 
       overriden_block = Proc.new { |depth|
         if not element == 'default'
           reset_unhandled_bytes
         end
+
         block.call(depth)
       }
       @parser_machine.on_tag_open(element, overriden_block)
     end
 
-    def on_tag_close(element='default', &block)
+    def on_tag_close(element='.', &block)
       overriden_block = Proc.new { |hash, depth|
-        #if not element == 'default'
-          reset_unhandled_bytes
-        #end
+        reset_unhandled_bytes
+
         block.call(hash, depth)
       }
       @parser_machine.on_tag_close(element, overriden_block)
@@ -51,6 +67,11 @@ module Bliss
     def on_max_unhandled_bytes(bytes, &block)
       @max_unhandled_bytes = bytes
       @on_max_unhandled_bytes = block
+    end
+
+    def on_timeout(seconds, &block)
+      @timeout = seconds
+      @on_timeout = block
     end
 
     def wait_tag_close(element)
@@ -68,7 +89,6 @@ module Bliss
           @on_max_unhandled_bytes.call
           @on_max_unhandled_bytes = nil
         end
-        #self.close
       end
     end
 
@@ -93,9 +113,15 @@ module Bliss
 
     def parse
       reset_unhandled_bytes if check_unhandled_bytes?
+      load_constraints_on_parser_machine
 
       EM.run do
-        http = EM::HttpRequest.new(@path).get
+        http = nil
+        if @timeout
+          http = EM::HttpRequest.new(@path, :connect_timeout => @timeout, :inactivity_timeout => @timeout).get
+        else
+          http = EM::HttpRequest.new(@path).get
+        end
         
         @autodetect_compression = true
         compression = :none
@@ -154,6 +180,9 @@ module Bliss
         }
         http.errback {
           #puts 'errback'
+          if @timeout
+            @on_timeout.call
+          end
           secure_close
         }
         http.callback {
@@ -167,12 +196,6 @@ module Bliss
       file_close
     end
 
-    def autodetect_compression(http)
-      #compression = :none
-      puts compression
-      return compression
-    end
-    
     def handle_wait_tag_close(chunk)
       begin
         last_index = chunk.index(@wait_tag_close)
@@ -209,9 +232,3 @@ module Bliss
 
   end
 end
-
-#require 'stringio'
-#str = StringIO.new
-#z = Zlib::GzipWriter.new(str)
-#z.write(txt)
-#z.close
