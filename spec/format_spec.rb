@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe Bliss::Format do
   before do
-    @format = Bliss::Format.new
+    @format = Bliss::Format.new(File.dirname(__FILE__) + '/../spec.yml')
   end
 
   describe '.constraints' do

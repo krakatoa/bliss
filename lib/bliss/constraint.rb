@@ -102,7 +102,7 @@ module Bliss
         when :not_checked
           case @setting
             when :tag_name_suggested
-              [@depth, "exists"]
+              [@depth, "missing"]
           end
       end
     end
