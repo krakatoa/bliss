@@ -98,22 +98,6 @@ module Bliss
       @current_content = ''
     end
 
-=begin
-    def open_tag_regexps
-      return @open_tag_regexps if @open_tag_regexps
-
-      @open_tag_regexps = @on_tag_open.keys.collect {|key| Regexp.new(key) }
-      @open_tag_regexps
-    end
-
-    def close_tag_regexps
-      return @close_tag_regexps if @close_tag_regexps
-
-      @close_tag_regexps = @on_tag_close.keys.collect {|key| Regexp.new(key) }
-      @close_tag_regexps
-    end
-=end
-
     def characters(string)
       return if is_closed?
       concat_content(string)
@@ -150,13 +134,13 @@ module Bliss
 
       search_key = @depth.join('/') # element
       
-      if @depth.last == 'ad'
+      #if @depth.last == 'ad'
         #puts search_key
         #puts value_at.keys.inspect
         #ad array #puts @constraints.select{|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$"))}.inspect
         #puts current.keys.inspect
         # others puts @constraints.select{|c| search_key.match(Regexp.new("#{c.depth.split('/')[0..-2].join('/')}$"))}.inspect
-      end
+      #end
 
       @on_tag_close.keys.select{ |r| search_key.match(r) }.each do |reg|
         @on_tag_close[reg].call(value_at, @depth)
@@ -164,6 +148,9 @@ module Bliss
       # TODO constraint should return Regexp like depth too
 
       #puts @constraints.collect(&:state).inspect
+      
+      #puts @constraints.collect{|c| "#{c.depth}" }
+      #puts @constraints.collect{|c| "#{c.depth.split("/").join('/')}" }
 
       @constraints.select{|c| [:not_checked, :passed].include?(c.state) }.select {|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$")) }.each do |constraint|
         #puts "search_key: #{search_key}"

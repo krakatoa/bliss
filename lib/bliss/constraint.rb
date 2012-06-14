@@ -23,7 +23,7 @@ module Bliss
         #  break
         #end
         case @setting
-          when :tag_name_required
+          when :tag_name_required, :tag_name_suggested
             content = nil
             if hash
               #puts "#{@depth.inspect} - required: #{required.inspect}"
@@ -48,8 +48,8 @@ module Bliss
               found = false
               self.tag_names.each do |key|
                 content = hash[key]
-                puts content
-                puts @possible_values.inspect
+                #puts content
+                #puts @possible_values.inspect
                 if @possible_values.include?(content)
                   found = true
                   break
@@ -96,7 +96,12 @@ module Bliss
           end
         when :passed
           case @setting
-            when :tag_name_required
+            when :tag_name_required, :tag_name_suggested
+              [@depth, "exists"]
+          end
+        when :not_checked
+          case @setting
+            when :tag_name_suggested
               [@depth, "exists"]
           end
       end

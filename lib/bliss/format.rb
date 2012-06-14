@@ -36,14 +36,23 @@ module Bliss
           settings.store('tag_name_values', settings.delete('tag_name_values')) if settings.has_key?('tag_name_values')
           settings.store('content_values', settings.delete('content_values')) if settings.has_key?('content_values')
 
-          #puts settings.inspect
-
-          #depth_name = nil
-          #setting_to_constraints(depth, settings).each { |cc|
-            #cc.depth = depth_name
-          #  @constraints.push(cc) #Bliss::Constraint.new(depth_name, cc.setting))
-          #}
-          @constraints.concat(Bliss::Format.settings_to_constraints(depth, settings))
+          # get extended depth
+          indepth = []
+          #puts "depth: #{depth}"
+          depth.each_with_index { |v, i|
+            value_at_c = @specs.value_at_chain(depth[0..i])
+            if value_at_c.is_a? Hash
+              if value_at_c.has_key?('tag_name_values')
+                indepth.push "(#{value_at_c['tag_name_values'].join("|")})"
+              else
+                indepth.push depth[i]
+              end
+            else
+              #indepth.push depth.last
+            end
+          }
+          #puts indepth.inspect
+          @constraints.concat(Bliss::Format.settings_to_constraints(indepth, settings))
 
         end
       end
@@ -66,6 +75,9 @@ module Bliss
             if value == true
               depth_name ||= depth.join('/')
               current_constraints.push(Bliss::Constraint.new(depth_name, :tag_name_required))
+            else
+              depth_name ||= depth.join('/')
+              current_constraints.push(Bliss::Constraint.new(depth_name, :tag_name_suggested))
             end
           when "tag_name_values"
             depth_name = depth[0..-2].join('/')

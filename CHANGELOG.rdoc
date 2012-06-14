@@ -1,3 +1,9 @@
+== 0.1.1
+
+* Bugfixes
+
+  * Not required tag_names now work in any depth level, no longer at last level only.
+
 == 0.1.0
   * Added support for (possible) "content_values" on Bliss::Format.
 
