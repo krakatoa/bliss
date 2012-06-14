@@ -28,9 +28,14 @@ module Bliss
     end
 
     def formats_details
-      @formats.each do |format|
-        puts format.details.inspect
-      end
+      #@formats.each do |format|
+      #  puts format.details.inspect
+      #end
+      @formats.collect(&:details)
+    end
+
+    def formats_index
+      @formats.collect(&:index)
     end
 
     # deprecate this, use depth at on_tag_open or on_tag_close instead

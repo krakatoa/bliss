@@ -102,6 +102,10 @@ module Bliss
       end
     end
 
+    def reset!
+      @state = :not_checked
+    end
+
     #def self.build_constraint(depth, setting, params={})#, field, type, possible_values=nil)
     #  constraints = []
       #constraints.push Bliss::Constraint.new(field, :exist) if types.include?(:exist)
