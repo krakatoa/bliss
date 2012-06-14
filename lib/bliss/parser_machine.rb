@@ -143,7 +143,11 @@ module Bliss
       #end
 
       @on_tag_close.keys.select{ |r| search_key.match(r) }.each do |reg|
-        @on_tag_close[reg].call(value_at, @depth)
+        if value_at.empty?
+          @on_tag_close[reg].call(current, @dept)
+        else
+          @on_tag_close[reg].call(value_at, @depth)
+        end
       end
       # TODO constraint should return Regexp like depth too
 

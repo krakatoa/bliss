@@ -93,24 +93,6 @@ module Bliss
       current_constraints
     end
 
-    #def open_tag_constraints(depth)
-    #  # raise error if not depth.is_a? Array
-    #  begin
-    #    to_check_constraints = self.to_check_constraints.select {|c| [:tag_name_required].include?(c.setting) }.select {|c| Regexp.new(c.depth).match(depth) }
-    #  rescue
-    #    []
-    #  end
-    #end
-
-    #def close_tag_constraints(depth)
-    #  # raise error if not depth.is_a? Array
-    #  begin
-    #    to_check_constraints = self.to_check_constraints.select {|c| Regexp.new(c.depth.split('/')[0..-2].join('/')).match(depth) }
-    #  rescue
-    #    []
-    #  end
-    #end
-
     # constraint set model? constraints.valid.with_depth(['root', 'ads']) ???
     def to_check_constraints
       # raise error if not depth.is_a? Array
