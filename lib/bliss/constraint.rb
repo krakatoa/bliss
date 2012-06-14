@@ -38,7 +38,9 @@ module Bliss
               if found
                 @state = :passed
               else
-                @state = :not_passed
+                if @setting == :tag_name_required
+                  @state = :not_passed
+                end
               end
             else
               @state = :passed
@@ -102,7 +104,7 @@ module Bliss
         when :not_checked
           case @setting
             when :tag_name_suggested
-              [@depth, "missing"]
+              [@depth, "suggested"]
           end
       end
     end
