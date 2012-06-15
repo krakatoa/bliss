@@ -84,7 +84,7 @@ module Bliss
     end
 
     def detail
-      self.ended! # TODO esto es una chota de codigo groncho!
+      #self.ended! # TODO esto es una chota de codigo groncho!
 
       case @state
         when :not_passed

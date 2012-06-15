@@ -111,6 +111,7 @@ module Bliss
     def index
       # Returns an Array with the states of the current constraint_set in the form of:
       # [ not_passed, passed, not_checked ]
+      # TODO it needs the constraint to be ended!, very ugly
       [
         constraints.count {|c| c.state == :not_passed},
         constraints.count {|c| c.state == :passed},
