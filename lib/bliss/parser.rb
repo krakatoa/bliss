@@ -1,5 +1,9 @@
 module Bliss
   class Parser
+    attr_reader :push_parser
+    attr_reader :parser_machine
+    attr_accessor :unhandled_bytes
+
     def initialize(path, filepath=nil)
       @path = path
       
@@ -139,22 +143,23 @@ module Bliss
           end
         end
         
+        parser = self
         http.stream { |chunk|
           if chunk
             chunk.force_encoding('UTF-8')
 
-            if check_unhandled_bytes?
-              @unhandled_bytes += chunk.length
-              check_unhandled_bytes
+            if parser.check_unhandled_bytes?
+              parser.unhandled_bytes += chunk.length
+              parser.check_unhandled_bytes
             end
-            if not @parser_machine.is_closed?
+            if not parser.parser_machine.is_closed?
               begin
                 case compression
                   when :gzip
                     chunk = @zstream.inflate(chunk)
                     chunk.force_encoding('UTF-8')
                 end
-                @push_parser << chunk
+                parser.push_parser << chunk
                 if @file
                   @file << chunk
                 end
@@ -188,14 +193,14 @@ module Bliss
           if @timeout
             @on_timeout.call
           end
-          secure_close
+          parser.secure_close
         }
         http.callback {
           #if @file
           #  @file.close
           #end
           #EM.stop
-          secure_close
+          parser.secure_close
         }
       end
       file_close

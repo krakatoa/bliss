@@ -3,10 +3,30 @@ require 'spec_helper'
 #require_dependency 'xmlrpc/client'
 
 describe Bliss::Parser do
-  before do
-    @parser = Bliss::Parser.new('http://www.topdiffusion.com/flux/topdiffusion_adsdeck.xml')
-    @format = Bliss::Format.new(File.dirname(__FILE__) + '/../spec.yml')
-    @parser.add_format(@format)
+  #before do
+  #  @parser = Bliss::Parser.new('http://www.topdiffusion.com/flux/topdiffusion_adsdeck.xml')
+  #  @format = Bliss::Format.new(File.dirname(__FILE__) + '/../spec.yml')
+  #  @parser.add_format(@format)
+  #end
+
+  context 'when parsing a valid document' do
+    it "should parse" do
+      mocked_request("<root><el>test</el></root>")
+      
+      @parser = Bliss::Parser.new('mock')
+
+      count = 0
+      @parser.on_tag_close { |hash, depth|
+        count += 1
+        case count
+          when 1
+            depth.should == ['root', 'el']
+          when 2
+            depth.should == ['root']
+        end
+      }
+      @parser.parse
+    end
   end
 
 =begin
