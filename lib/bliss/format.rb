@@ -105,21 +105,21 @@ module Bliss
     end
 
     def details
-      @constraints.collect(&:detail)
+      constraints.collect(&:detail)
     end
 
     def index
       # Returns an Array with the states of the current constraint_set in the form of:
       # [ not_passed, passed, not_checked ]
       [
-        @constraints.count {|c| c.state == :not_passed},
-        @constraints.count {|c| c.state == :passed},
-        @constraints.count {|c| c.state == :not_checked}
+        constraints.count {|c| c.state == :not_passed},
+        constraints.count {|c| c.state == :passed},
+        constraints.count {|c| c.state == :not_checked}
       ]
     end
 
     def error_details
-      @constraints.select {|c| c.state == :not_passed }.collect(&:detail)
+      constraints.select {|c| c.state == :not_passed }.collect(&:detail)
     end
 
     def reset_constraints_state
