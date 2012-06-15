@@ -76,7 +76,7 @@ module Bliss
 
     def ended!
       case @setting
-        when :tag_name_required
+        when :tag_name_required, :content_values
           if @state == :not_checked
             @state = :not_passed
           end
@@ -86,11 +86,13 @@ module Bliss
     def detail
       #self.ended! # TODO esto es una chota de codigo groncho!
 
-      case @state
+      returned = case @state
         when :not_passed
           case @setting
             when :tag_name_required
               [@depth, "missing"]
+            when :content_values
+              [@depth, "invalid"]
             #when :not_blank
             #  [@field.join(" or "), "blank"]
             #when :possible_values
@@ -98,7 +100,7 @@ module Bliss
           end
         when :passed
           case @setting
-            when :tag_name_required, :tag_name_suggested
+            when :tag_name_required, :tag_name_suggested, :content_values
               [@depth, "exists"]
           end
         when :not_checked
@@ -107,6 +109,7 @@ module Bliss
               [@depth, "suggested"]
           end
       end
+      returned
     end
 
     def reset!

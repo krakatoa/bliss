@@ -160,7 +160,6 @@ module Bliss
         #puts "search_key: #{search_key}"
         #puts "value_at.inspect: #{value_at.inspect}"
         #puts "current.inspect: #{current.inspect}"
-
         constraint.run!(current)
       end
 
