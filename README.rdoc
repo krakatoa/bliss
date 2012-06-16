@@ -1,5 +1,5 @@
 = bliss
-[![Dependency Status](https://gemnasium.com/krakatoa/bliss.png)](https://gemnasium.com/krakatoa/bliss)
+{<img src="https://gemnasium.com/krakatoa/bliss.png" alt="Dependency Status" />}[https://gemnasium.com/krakatoa/bliss]
 
   require 'rubygems'
   require 'bliss'
