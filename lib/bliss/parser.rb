@@ -136,7 +136,7 @@ module Bliss
         compression = :none
         if @autodetect_compression
           http.headers do
-            if (/^attachment.+filename.+\.gz/i === http.response_header['CONTENT_DISPOSITION']) or http.response_header.compressed? or ["application/octet-stream", "application/x-gzip"].include? http.response_header['CONTENT_TYPE']
+            if (/^attachment.+filename.+\.gz/i === http.response_header['CONTENT_DISPOSITION']) or http.response_header.compressed? or ["application/octet-stream", "application/x-gzip", "application/gzip"].include? http.response_header['CONTENT_TYPE']
               @zstream = Zlib::Inflate.new(Zlib::MAX_WBITS+16)
               compression = :gzip
             end
