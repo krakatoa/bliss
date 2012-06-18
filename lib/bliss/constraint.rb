@@ -100,8 +100,10 @@ module Bliss
           end
         when :passed
           case @setting
-            when :tag_name_required, :tag_name_suggested, :content_values
+            when :tag_name_required, :tag_name_suggested
               [@depth, "exists"]
+            when :content_values
+              [@depth, "valid"]
           end
         when :not_checked
           case @setting
