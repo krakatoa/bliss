@@ -5,6 +5,7 @@ source "http://rubygems.org"
 
 gem "nokogiri", ">= 1.5.5"
 gem "eventmachine", ">= 0.12.0"
+gem "em-socksify", "=0.1.0"
 gem "em-http-request", ">= 1.0.2"
 
 # Add dependencies to develop your gem here.
