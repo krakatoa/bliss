@@ -56,8 +56,7 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<nokogiri>, [">= 1.5.5"])
-      s.add_runtime_dependency(%q<eventmachine>, [">= 0.12.0"])
-      s.add_runtime_dependency(%q<em-socksify>, ["= 0.1.0"])
+      s.add_runtime_dependency(%q<eventmachine>, [">= 1.0.0.beta.4"])
       s.add_runtime_dependency(%q<em-http-request>, [">= 1.0.2"])
       s.add_development_dependency(%q<rspec>, ["~> 2.11.0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.1.3"])
@@ -65,8 +64,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<simplecov>, [">= 0"])
     else
       s.add_dependency(%q<nokogiri>, [">= 1.5.5"])
-      s.add_dependency(%q<eventmachine>, [">= 0.12.0"])
-      s.add_dependency(%q<em-socksify>, ["= 0.1.0"])
+      s.add_dependency(%q<eventmachine>, [">= 1.0.0.beta.4"])
       s.add_dependency(%q<em-http-request>, [">= 1.0.2"])
       s.add_dependency(%q<rspec>, ["~> 2.11.0"])
       s.add_dependency(%q<bundler>, ["~> 1.1.3"])
@@ -75,8 +73,7 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<nokogiri>, [">= 1.5.5"])
-    s.add_dependency(%q<eventmachine>, [">= 0.12.0"])
-    s.add_dependency(%q<em-socksify>, ["= 0.1.0"])
+    s.add_dependency(%q<eventmachine>, [">= 1.0.0.beta.4"])
     s.add_dependency(%q<em-http-request>, [">= 1.0.2"])
     s.add_dependency(%q<rspec>, ["~> 2.11.0"])
     s.add_dependency(%q<bundler>, ["~> 1.1.3"])
