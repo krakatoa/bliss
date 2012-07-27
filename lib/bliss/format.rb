@@ -51,46 +51,12 @@ module Bliss
               #indepth.push depth.last
             end
           }
-          #puts indepth.inspect
-          @constraints.concat(Bliss::Format.settings_to_constraints(indepth, settings))
+          @constraints.concat(Bliss::Constraint.build_from_settings(indepth, settings))
 
         end
       end
 
       return @constraints
-    end
-
-    def self.settings_to_constraints(depth, settings)
-      # TODO perhaps the Constraint model should handle this
-      # e.g., constraint.add_depth (as array)
-      # then internally it creates xpath-like depth
-
-      current_constraints = []
-      depth_name = nil
-      content_values = nil
-      #puts "#{depth.join('/')}: #{settings.inspect}"
-      settings.each_pair { |setting, value|
-        case setting
-          when "tag_name_required"
-            if value == true
-              depth_name ||= depth.join('/')
-              current_constraints.push(Bliss::Constraint.new(depth_name, :tag_name_required))
-            else
-              depth_name ||= depth.join('/')
-              current_constraints.push(Bliss::Constraint.new(depth_name, :tag_name_suggested))
-            end
-          when "tag_name_values"
-            depth_name = depth[0..-2].join('/')
-            depth_name << "/" if depth_name.size > 0
-            depth_name << "(#{value.join('|')})" # TODO esto funciona solo en el ultimo step del depth :/
-          when "content_values"
-            current_constraints.push(Bliss::Constraint.new(depth_name, :content_values, {:possible_values => value}))
-        end
-      }
-      current_constraints.each {|cc|
-        cc.depth = depth_name
-      }
-      current_constraints
     end
 
     # constraint set model? constraints.valid.with_depth(['root', 'ads']) ???

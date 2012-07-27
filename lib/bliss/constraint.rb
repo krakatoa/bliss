@@ -118,12 +118,67 @@ module Bliss
       @state = :not_checked
     end
 
-    #def self.build_constraint(depth, setting, params={})#, field, type, possible_values=nil)
-    #  constraints = []
-      #constraints.push Bliss::Constraint.new(field, :exist) if types.include?(:exist)
-      #constraints.push Bliss::Constraint.new(field, :not_blank) if types.include?(:not_blank)
-      #constraints.push BlissConstraint.new(field, :possible_values, possible_values) if types.include?(:possible_values)
-    #  constraints
-    #end
+    # Builds a collection of constraints that represent the given settings
+    #
+    # @param [String] depth
+    #   The tag depth on which the given constraints will work
+    #
+    # @param [Hash] settings
+    #
+    # @return [Array<Bliss::Constraint>] that represents the given settings
+    #
+    # @example
+    #   Bliss::Constraint.build_from_settings(["root", "child"], {"tag_name_required" => false})
+    #
+    def self.build_from_settings(depth, settings)
+      constraints = []
+
+      depth_name = Bliss::Constraint.depth_name_from_depth(depth, settings["tag_name_values"])
+      
+      settings.each_pair { |setting, value|
+        case setting
+          when "tag_name_required"
+            if value == true
+              constraints.push(Bliss::Constraint.new(depth_name, :tag_name_required))
+            else
+              constraints.push(Bliss::Constraint.new(depth_name, :tag_name_suggested))
+            end
+          when "content_values"
+            constraints.push(Bliss::Constraint.new(depth_name, :content_values, {:possible_values => value}))
+        end
+      }
+      constraints
+    end
+
+    def self.depth_name_from_depth(depth, tag_name_values)
+      depth_name = nil
+      if not tag_name_values
+        depth_name ||= depth.join('/')
+      else
+        # TODO esto funciona solo en el ultimo step del depth :/
+        #   es decir, devolveria: root/(ad|item)
+        #   pero nunca podria devolver: (root|base)/(ad|item)
+        #
+        #   una solucion seria la busqueda de bifurcaciones en las anteriores constraints para armar un depth_name completo
+
+        depth_name = depth[0..-2].join('/')
+        depth_name << "/" if depth_name.size > 0
+        depth_name << "(#{tag_name_values.join('|')})"
+      end
+      
+      # TODO Analyze creating a Depth model for handling of path/depth/tree during constraint creation
+      # depth
+      # {"root" => {"ad" => {}}}
+
+      # path  => "root/(ad|item)"
+      # depth => 2
+      # tree  => {"root" => {["ad", "item"] => nil}}
+      
+      #   tree.recurse(true)
+      # 
+
+      return depth_name
+    end
+
   end
 end
