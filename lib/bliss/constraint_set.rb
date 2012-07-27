@@ -5,6 +5,22 @@ module Bliss
     def initialize(specs)
       @constraints = Bliss::ConstraintSet.build_from_specs(specs)
     end
+
+    def constraints
+      @constraints
+    end
+
+    def not_checked
+      begin
+        to_check_constraints = constraints.select {|c| [:not_checked, :passed].include?(c.state) }
+        to_check_constraints
+      rescue
+        []
+      end
+    end
+
+    # TODO
+    #   scope constraints by depth ?
     
     def self.build_from_specs(specs)
       return [] if not (specs.is_a? Hash and specs.size > 0)

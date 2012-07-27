@@ -17,15 +17,9 @@ module Bliss
       @constraint_set.constraints
     end
 
-    # constraint set model? constraints.valid.with_depth(['root', 'ads']) ???
     def to_check_constraints
+      @constraint_set.not_checked
       # raise error if not depth.is_a? Array
-      begin
-        to_check_constraints = constraints.select {|c| [:not_checked, :passed].include?(c.state) }
-        to_check_constraints
-      rescue
-        []
-      end
     end
 
     def details
@@ -51,9 +45,6 @@ module Bliss
       return false if not @constraints
       @constraints.each {|c| c.reset!}
     end
-
-    # reset_constraints_state
-    # build_constraints
 
   end
 end
