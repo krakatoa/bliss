@@ -42,8 +42,8 @@ module Bliss
                   @state = :not_passed
                 end
               end
-            #else
-            #  @state = :passed
+            else
+              @state = :passed
             end
           when :content_values
             if hash

@@ -1,5 +1,9 @@
 == 0.1.1
 
+* Features
+
+  * Added tag_name_suggested constraint type.
+
 * Bugfixes
 
   * Not required tag_names now work in any depth level, no longer at last level only.
