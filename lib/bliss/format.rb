@@ -4,14 +4,10 @@ module Bliss
   class Format
 
     def initialize(filepath)
-      self.specifications = YAML.load_file(filepath)
-      @constraint_set = Bliss::ConstraintSet.new(@specs)
-    end
+      specifications = YAML.load_file(filepath)
 
-    def specifications=(specs={})
-      @specs = specs.dup
+      @constraint_set = Bliss::ConstraintSet.new(specifications)
     end
-    alias :specs= :specifications=
 
     def constraints
       @constraint_set.constraints
