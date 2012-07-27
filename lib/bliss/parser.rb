@@ -7,7 +7,7 @@ module Bliss
     def initialize(path, filepath=nil)
       @path = path
       
-      @parser_machine = Bliss::ParserMachine.new
+      @parser_machine = Bliss::ParserMachine.new(self)
 
       @push_parser = Nokogiri::XML::SAX::PushParser.new(@parser_machine)
 
@@ -27,9 +27,13 @@ module Bliss
       @formats.push(format)
     end
 
-    def load_constraints_on_parser_machine
-      @parser_machine.constraints(@formats.collect(&:constraints).flatten)
+    def formats
+      @formats
     end
+
+    #def load_constraints_on_parser_machine
+    #  @parser_machine.constraints(@formats.collect(&:constraints).flatten)
+    #end
 
     def formats_details
       #@formats.each do |format|
@@ -122,7 +126,7 @@ module Bliss
 
     def parse
       reset_unhandled_bytes if check_unhandled_bytes?
-      load_constraints_on_parser_machine
+      #load_constraints_on_parser_machine
 
       EM.run do
         http = nil

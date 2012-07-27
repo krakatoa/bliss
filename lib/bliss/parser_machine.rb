@@ -1,6 +1,6 @@
 module Bliss
   class ParserMachine < Nokogiri::XML::SAX::Document
-    def initialize
+    def initialize(parser)
       @depth = []
       # @settings = {} # downcased
 
@@ -13,15 +13,17 @@ module Bliss
       @on_tag_open = {}
       @on_tag_close = {}
 
-      @constraints = []
+      #@constraints = []
+
+      @parser = parser
 
       @closed = false
 
     end
 
-    def constraints(constraints)
-      @constraints = constraints
-    end
+    #def constraints(constraints)
+      #@constraints = constraints
+    #end
 
     def on_root(&block)
       @on_root = block
@@ -156,11 +158,13 @@ module Bliss
       #puts @constraints.collect{|c| "#{c.depth}" }
       #puts @constraints.collect{|c| "#{c.depth.split("/").join('/')}" }
 
-      @constraints.select{|c| [:not_checked, :passed].include?(c.state) }.select {|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$")) }.each do |constraint|
-        #puts "search_key: #{search_key}"
-        #puts "value_at.inspect: #{value_at.inspect}"
-        #puts "current.inspect: #{current.inspect}"
-        constraint.run!(current)
+      @parser.formats.each do |format|
+        format.constraints.select{|c| [:not_checked, :passed].include?(c.state) }.select {|c| search_key.match(Regexp.new("#{c.depth.split('/').join('/')}$")) }.each do |constraint|
+          #puts "search_key: #{search_key}"
+          #puts "value_at.inspect: #{value_at.inspect}"
+          #puts "current.inspect: #{current.inspect}"
+          constraint.run!(current)
+        end
       end
 
       @depth.pop if @depth.last == element
