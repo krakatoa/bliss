@@ -178,6 +178,7 @@ module Bliss
     end
 
     def end_document
+
       #puts @nodes.inspect
     end
   end
