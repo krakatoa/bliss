@@ -49,7 +49,7 @@ describe Bliss::Parser do
         puts "Encoding error!"
       end
     end
-    
+ 
 =begin
     it "should throw an Exception and continue parsing on compressed files" do
       #xml = <<-EOF
@@ -84,8 +84,8 @@ describe Bliss::Parser do
       end
       puts "ADS: #{ads_count}"
     end
-  end
 =end
+  end
 
 =begin
   context 'when parsing a valid document' do
