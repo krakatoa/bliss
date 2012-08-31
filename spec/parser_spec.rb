@@ -42,19 +42,45 @@ describe Bliss::Parser do
 
       @parser = Bliss::Parser.new('mock', "test.xml")
 
-      ads_count = 0
-      @parser.on_tag_close("root/ad") { |hash, depth|
-        puts "\n"
-        puts "hash: #{hash.inspect}"
-        ads_count += 1
-        #puts depth.inspect
-      }
       begin
+        puts "\n --PARSING--"
         @parser.parse
       rescue Bliss::EncodingError => err
         puts "Encoding error!"
       end
     end
+    
+=begin
+    it "should throw an Exception and continue parsing on compressed files" do
+      #xml = <<-EOF
+      #EOF
+
+      #xml = IO.binread(File.dirname(File.expand_path(__FILE__)) + "/mock/encoding_big.tar.gz")
+      xml = IO.binread(File.dirname(File.expand_path(__FILE__)) + "/mock/generic_phones-phones_pdas-active.xml.gz")
+
+      mocked_request(xml, {:compressed => true})
+
+      @parser = Bliss::Parser.new('mock', "test.xml")
+      @parser.on_max_unhandled_bytes(200000) {
+        puts "Stopped parjsing caused content data for tag was too big!"
+        @parser.close
+      }
+
+      ads_count = 0
+      @parser.on_tag_close("trovit/ad") { |hash, depth|
+        #puts "hash: #{hash.inspect}"
+        ads_count += 1
+        #puts depth.inspect
+      }
+      begin
+        puts "\n --PARSING--"
+        @parser.parse
+      #rescue Bliss::EncodingError => err
+      #  puts "Encoding error!"
+      end
+      puts "ADS: #{ads_count}"
+    end
+=end
   end
 
 =begin

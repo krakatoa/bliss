@@ -15,15 +15,19 @@ RSpec.configure do |config|
   
 end
 
-def mocked_request(content, headers=nil)
+def mocked_request(content, opts={})
+  # possible opts content
+  # {:compressed => true}
+  opts[:compressed] ||= false
+
   Addressable::URI.any_instance.stub(:validate) { nil }
   Addressable::URI.any_instance.stub(:port) { 80 }
   Addressable::URI.any_instance.stub(:host) { 'mock' }
 
   http_response_header = mock(EM::HttpResponseHeader)
-  http_response_header.stub(:compressed?) { false }
-  http_response_header.should_receive(:[]).with('CONTENT_DISPOSITION').and_return("xml")
-  http_response_header.should_receive(:[]).with("CONTENT_TYPE").and_return("application/xml")
+  http_response_header.stub(:compressed?) { opts[:compressed] }
+  http_response_header.should_receive(:[]).with('CONTENT_DISPOSITION')#.and_return("xml")
+  http_response_header.should_receive(:[]).with("CONTENT_TYPE")#.and_return("application/xml")
 
   http_client = mock(EM::HttpClient)
   http_client.stub(:response_header) { http_response_header }
