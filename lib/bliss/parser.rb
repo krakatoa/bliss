@@ -112,6 +112,7 @@ module Bliss
       @push_parser = Nokogiri::XML::SAX::PushParser.new(@parser_machine)
       initialize_on_tag_open
       initialize_on_tag_close
+      reset_unhandled_bytes
     end
 
     def on_max_unhandled_bytes(bytes, &block)
