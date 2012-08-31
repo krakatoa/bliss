@@ -208,8 +208,8 @@ module Bliss
                 chunk.lines.each { |line|
                   case compression
                     when :gzip
-                      chunk = @zstream.inflate(chunk)
-                      chunk.force_encoding('UTF-8')
+                      line = @zstream.inflate(line)
+                      line.force_encoding('UTF-8')
                   end
                   begin
                     if not parser.header
