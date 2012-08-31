@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Fernando Alonso"]
-  s.date = "2012-08-09"
+  s.date = "2012-08-31"
   s.description = "streamed xml parsing tool"
   s.email = "krakatoa1987@gmail.com"
   s.extra_rdoc_files = [
@@ -37,10 +37,12 @@ Gem::Specification.new do |s|
     "lib/bliss/format.rb",
     "lib/bliss/parser.rb",
     "lib/bliss/parser_machine.rb",
+    "lib/bliss/parser_machine_builder.rb",
     "lib/hash_extension.rb",
     "spec.yml",
     "spec/constraint_spec.rb",
     "spec/format_spec.rb",
+    "spec/mock/encoding.xml",
     "spec/parser_spec.rb",
     "spec/spec_helper.rb",
     "test.rb",
@@ -50,7 +52,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/krakatoa/bliss"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.24"
+  s.rubygems_version = "1.8.15"
   s.summary = "streamed xml parsing tool"
 
   if s.respond_to? :specification_version then
