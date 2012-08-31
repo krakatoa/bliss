@@ -11,4 +11,5 @@ require 'bliss/format'
 
 require 'bliss/encoding_error'
 require 'bliss/parser_machine'
+require 'bliss/parser_machine_builder'
 require 'bliss/parser'
