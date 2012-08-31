@@ -72,16 +72,20 @@ describe Bliss::Parser do
         ads_count += 1
         #puts depth.inspect
       }
+      @parser.on_error { |error_type, details|
+        puts "Error: #{error_type}"
+        puts details[:partial_node]
+        #puts details[:line]
+      }
       begin
-        puts "\n --PARSING--"
         @parser.parse
       #rescue Bliss::EncodingError => err
       #  puts "Encoding error!"
       end
       puts "ADS: #{ads_count}"
     end
-=end
   end
+=end
 
 =begin
   context 'when parsing a valid document' do

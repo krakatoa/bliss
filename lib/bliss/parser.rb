@@ -8,10 +8,6 @@ module Bliss
     def initialize(path, filepath=nil)
       @path = path
       
-      #@parser_machine = Bliss::ParserMachine.new(self)
-
-      #@push_parser = Nokogiri::XML::SAX::PushParser.new(@parser_machine)
-
       if filepath
         @file = File.new(filepath, 'w')
         @file.autoclose = false
@@ -22,11 +18,22 @@ module Bliss
       @nodes = nil
       @formats = []
 
-      @on_tag_open = {}
-      @on_tag_close = {}
       @zstream = nil
 
-      #on_root {}
+      @machine_builder = Bliss::ParserMachineBuilder.new(self)
+      self
+    end
+    
+    def on_error(&block)
+      @machine_builder.on_error(&block)
+    end
+
+    def on_tag_open(element='.', &block)
+      @machine_builder.on_tag_open(element, block)
+    end
+
+    def on_tag_close(element='.', &block)
+      @machine_builder.on_tag_close(element, block)
     end
 
     def add_format(format)
@@ -60,67 +67,14 @@ module Bliss
       @formats.collect(&:index)
     end
 
-=begin
-    # deprecate this, use depth at on_tag_open or on_tag_close instead
-    def on_root(&block)
-      return false if not block.is_a? Proc
-      @parser_machine.on_root { |root|
-        @root = root
-        block.call(root)
-      }
-    end
-=end
-
-    def on_tag_open(element='.', &block)
-      return false if block.arity != 1
-      @on_tag_open[element] = block
-    end
-
-    def initialize_on_tag_open
-      return if not @on_tag_open
-
-      @on_tag_open.each {|el, bl|
-        overriden_block = Proc.new { |depth|
-          if not el == 'default'
-            reset_unhandled_bytes
-          end
-
-          bl.call(depth)
-        }
-        @parser_machine.on_tag_open(el, overriden_block)
-      }
-    end
-
-    def on_tag_close(element='.', &block)
-      return false if block.arity < 1
-      @on_tag_close[element] = block
-    end
-
-    def initialize_on_tag_close
-      return if not @on_tag_close
-      @on_tag_close.each {|el, bl|
-        overriden_block = Proc.new { |hash, depth|
-          reset_unhandled_bytes
-
-          bl.call(hash, depth)
-        }
-        @parser_machine.on_tag_close(el, overriden_block)
-      }
-    end
-
-    def initialize_push_parser
-      #puts "Initializing PushParser\n"
-      @parser_machine = Bliss::ParserMachine.new(self)
-      @push_parser = Nokogiri::XML::SAX::PushParser.new(@parser_machine)
-      initialize_on_tag_open
-      initialize_on_tag_close
-      reset_unhandled_bytes
-      #puts "Initialized. PushParser (#{self.parser_machine.inspect})\n"
-    end
-
     def on_max_unhandled_bytes(bytes, &block)
       @max_unhandled_bytes = bytes
       @on_max_unhandled_bytes = block
+    end
+    
+    def initialize_push_parser
+      @parser_machine, @push_parser = @machine_builder.build_parser_machine
+      reset_unhandled_bytes
     end
 
     def on_timeout(seconds, &block)
@@ -182,6 +136,12 @@ module Bliss
       @parser_machine.close
     end
 
+    def trigger_error_callback(error_type, details={})
+      if @machine_builder.error_callback_defined?
+        @machine_builder.call_on_error(error_type, details)
+      end
+    end
+
     def parse
       reset_unhandled_bytes if check_unhandled_bytes?
       #load_constraints_on_parser_machine
@@ -231,10 +191,8 @@ module Bliss
                   parser.push_parser << line
                 rescue Nokogiri::XML::SyntaxError => e
                   if e.message.include?("encoding")
-                    puts "Wrong encoding given:"
-                    puts line
                     current_depth = parser.current_depth.dup
-                    #puts parser.current_node.inspect
+                    current_node = parser.current_node.dup
 
                     parser.initialize_push_parser
                     parser.push_parser << parser.header
@@ -245,7 +203,10 @@ module Bliss
                       parser.push_parser << tag
                     }
                     parser.parser_machine.ignore_next_close(current_depth[0..-2].join("/"))
-                    puts "\n"
+                    parser.trigger_error_callback("encoding", {
+                      :partial_node => current_node,
+                      :line => line}
+                    )
                     #raise Bliss::EncodingError, "Wrong encoding given"
                   end
                   next
