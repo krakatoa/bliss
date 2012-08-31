@@ -14,11 +14,16 @@ module Bliss
       @on_tag_close = {}
 
       #@constraints = []
+      @ignore_close = []
 
       @parser = parser
 
       @closed = false
 
+    end
+
+    def current_depth
+      @depth
     end
 
     #def constraints(constraints)
@@ -110,6 +115,33 @@ module Bliss
       concat_content(string)
     end
 
+    def ignore_next_close(tag)
+      @ignore_close.push(tag)
+    end
+
+    def current_node
+      current = @nodes.pair_at_chain(@depth[0..-2]).dup
+      value_at = @nodes.value_at_chain(@depth[0..-2]).dup
+
+      #if value_at.is_a? Hash
+      #  current[element] = @current_content if @current_content.size > 0
+      #elsif value_at.is_a? NilClass
+      #  if current.is_a? Array
+      #    current = current.last
+      #    current[element] = @current_content if @current_content.size > 0
+      #  end
+      #end
+      
+      current_node = nil
+      if value_at.empty?
+        current_node = current #@on_tag_close[reg].call(current, @depth)
+      else
+        current_node = value_at #@on_tag_close[reg].call(value_at, @depth)
+      end
+      current_node[@depth.last] = ""
+      current_node
+    end
+
     def end_element(element, attributes=[])
       return if is_closed?
       # element_transformation
@@ -145,10 +177,15 @@ module Bliss
       #end
 
       @on_tag_close.keys.select{ |r| search_key.match(r) }.each do |reg|
-        if value_at.empty?
-          @on_tag_close[reg].call(current, @depth)
+        #puts "search_key: #{search_key.inspect}"
+        if @ignore_close.include? search_key
+          @ignore_close.delete(search_key)
         else
-          @on_tag_close[reg].call(value_at, @depth)
+          if value_at.empty?
+            @on_tag_close[reg].call(current, @depth)
+          else
+            @on_tag_close[reg].call(value_at, @depth)
+          end
         end
       end
       # TODO constraint should return Regexp like depth too

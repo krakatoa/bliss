@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 require 'spec_helper'
 #require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 #require_dependency 'xmlrpc/client'
@@ -26,6 +28,32 @@ describe Bliss::Parser do
         end
       }
       @parser.parse
+    end
+  end
+
+  context 'when parsing a document with encoding issues' do
+    it "should throw an Exception and continue parsing" do
+      #xml = <<-EOF
+      #EOF
+
+      xml = File.read(File.dirname(File.expand_path(__FILE__)) + "/../topdif.xml")
+
+      mocked_request(xml)
+
+      @parser = Bliss::Parser.new('mock', "test.xml")
+
+      ads_count = 0
+      @parser.on_tag_close("root/ad") { |hash, depth|
+        puts "\n"
+        puts "hash: #{hash.inspect}"
+        ads_count += 1
+        #puts depth.inspect
+      }
+      begin
+        @parser.parse
+      rescue Bliss::EncodingError  => err
+        puts "Encoding error!"
+      end
     end
   end
 

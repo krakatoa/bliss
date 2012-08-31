@@ -1,5 +1,6 @@
 module Bliss
   class Parser
+    attr_reader :header
     attr_reader :push_parser
     attr_reader :parser_machine
     attr_accessor :unhandled_bytes
@@ -7,20 +8,24 @@ module Bliss
     def initialize(path, filepath=nil)
       @path = path
       
-      @parser_machine = Bliss::ParserMachine.new(self)
+      #@parser_machine = Bliss::ParserMachine.new(self)
 
-      @push_parser = Nokogiri::XML::SAX::PushParser.new(@parser_machine)
+      #@push_parser = Nokogiri::XML::SAX::PushParser.new(@parser_machine)
 
       if filepath
         @file = File.new(filepath, 'w')
         @file.autoclose = false
       end
 
+      @header = nil
       @root = nil
       @nodes = nil
       @formats = []
 
-      on_root {}
+      @on_tag_open = {}
+      @on_tag_close = {}
+
+      #on_root {}
     end
 
     def add_format(format)
@@ -35,6 +40,14 @@ module Bliss
     #  @parser_machine.constraints(@formats.collect(&:constraints).flatten)
     #end
 
+    def current_depth
+      @parser_machine.current_depth
+    end
+
+    def current_node
+      @parser_machine.current_node
+    end
+
     def formats_details
       #@formats.each do |format|
       #  puts format.details.inspect
@@ -46,6 +59,7 @@ module Bliss
       @formats.collect(&:index)
     end
 
+=begin
     # deprecate this, use depth at on_tag_open or on_tag_close instead
     def on_root(&block)
       return false if not block.is_a? Proc
@@ -54,27 +68,50 @@ module Bliss
         block.call(root)
       }
     end
+=end
 
     def on_tag_open(element='.', &block)
       return false if block.arity != 1
+      @on_tag_open[element] = block
+    end
 
-      overriden_block = Proc.new { |depth|
-        if not element == 'default'
-          reset_unhandled_bytes
-        end
+    def initialize_on_tag_open
+      return if not @on_tag_open
 
-        block.call(depth)
+      @on_tag_open.each {|el, bl|
+        overriden_block = Proc.new { |depth|
+          if not el == 'default'
+            reset_unhandled_bytes
+          end
+
+          bl.call(depth)
+        }
+        @parser_machine.on_tag_open(el, overriden_block)
       }
-      @parser_machine.on_tag_open(element, overriden_block)
     end
 
     def on_tag_close(element='.', &block)
-      overriden_block = Proc.new { |hash, depth|
-        reset_unhandled_bytes
+      return false if block.arity < 1
+      @on_tag_close[element] = block
+    end
 
-        block.call(hash, depth)
+    def initialize_on_tag_close
+      return if not @on_tag_close
+      @on_tag_close.each {|el, bl|
+        overriden_block = Proc.new { |hash, depth|
+          reset_unhandled_bytes
+
+          bl.call(hash, depth)
+        }
+        @parser_machine.on_tag_close(el, overriden_block)
       }
-      @parser_machine.on_tag_close(element, overriden_block)
+    end
+
+    def initialize_push_parser
+      @parser_machine = Bliss::ParserMachine.new(self)
+      @push_parser = Nokogiri::XML::SAX::PushParser.new(@parser_machine)
+      initialize_on_tag_open
+      initialize_on_tag_close
     end
 
     def on_max_unhandled_bytes(bytes, &block)
@@ -116,6 +153,15 @@ module Bliss
       @max_unhandled_bytes ? true : false
     end
 
+    def set_header(header)
+      return if header.empty?
+      @header ||= header
+    end
+
+    def header
+      @header
+    end
+
     def root
       @root
     end
@@ -127,6 +173,7 @@ module Bliss
     def parse
       reset_unhandled_bytes if check_unhandled_bytes?
       #load_constraints_on_parser_machine
+      self.initialize_push_parser
 
       EM.run do
         http = nil
@@ -157,22 +204,53 @@ module Bliss
               parser.check_unhandled_bytes
             end
             if not parser.parser_machine.is_closed?
-              begin
-                case compression
-                  when :gzip
-                    chunk = @zstream.inflate(chunk)
-                    chunk.force_encoding('UTF-8')
-                end
-                parser.push_parser << chunk
-                if @file
-                  @file << chunk
-                end
-              rescue Nokogiri::XML::SyntaxError => e
+              #begin
+                chunk.lines.each { |line|
+                  case compression
+                    when :gzip
+                      chunk = @zstream.inflate(chunk)
+                      chunk.force_encoding('UTF-8')
+                  end
+                  begin
+                    if not parser.header
+                      parser.set_header(line)
+                    end
+                    parser.push_parser << line
+                    #puts line
+                  rescue Nokogiri::XML::SyntaxError => e
+                    if e.message.include?("encoding")
+                      puts "Wrong encoding given:"
+                      puts line
+                      current_depth = parser.current_depth.dup
+                      #puts parser.current_node.inspect
+
+                      parser.initialize_push_parser
+                      parser.push_parser << parser.header
+                      #puts parser.header
+                      current_depth[0..-2].each { |tag|
+                        tag = "<#{tag}>"
+                        #puts tag
+                        parser.push_parser << tag
+                      }
+                      parser.parser_machine.ignore_next_close(current_depth[0..-2].join("/"))
+                      puts "\n"
+                      #raise Bliss::EncodingError, "Wrong encoding given"
+                    end
+                    next
+                  end
+                  if @file
+                    @file << line
+                  end
+                }
+              #rescue Nokogiri::XML::SyntaxError => e
                 #puts 'encoding error'
-                if e.message.include?("encoding")
-                  raise Bliss::EncodingError, "Wrong encoding given"
-                end
-              end
+                #if e.message.include?("encoding")
+                  #puts "Wrong encoding given"
+                  #puts chunk
+                  #puts "\n"
+                  #raise Bliss::EncodingError, "Wrong encoding given"
+                #end
+              #end
 
             else
               if exceeded?
