@@ -36,7 +36,7 @@ describe Bliss::Parser do
       #xml = <<-EOF
       #EOF
 
-      xml = File.read(File.dirname(File.expand_path(__FILE__)) + "/../topdif.xml")
+      xml = File.read(File.dirname(File.expand_path(__FILE__)) + "/mock/encoding.xml")
 
       mocked_request(xml)
 
@@ -51,7 +51,7 @@ describe Bliss::Parser do
       }
       begin
         @parser.parse
-      rescue Bliss::EncodingError  => err
+      rescue Bliss::EncodingError => err
         puts "Encoding error!"
       end
     end
