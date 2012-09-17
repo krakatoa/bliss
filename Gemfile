@@ -4,7 +4,7 @@ source "http://rubygems.org"
 #   gem "activesupport", ">= 2.3.5"
 
 gem "nokogiri", ">= 1.5.5"
-gem "eventmachine", ">= 1.0.0.beta.4"
+gem "eventmachine", "= 1.0.0.rc.4"
 gem "em-http-request", ">= 1.0.2"
 
 # Add dependencies to develop your gem here.
