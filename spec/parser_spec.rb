@@ -29,6 +29,26 @@ describe Bliss::Parser do
       }
       @parser.parse
     end
+    
+    it "should parse" do
+      mocked_request("<root><item><name><![CDATA[]]></name></item></root>")
+      
+      @parser = Bliss::Parser.new('mock')
+
+      count = 0
+      @parser.on_tag_close("root/item") { |hash, depth|
+        #puts hash.inspect
+        hash['name'].should == ""
+        #count += 1
+        #case count
+        #  when 1
+        #    depth.should == ['root', 'el']
+        #  when 2
+        #    depth.should == ['root']
+        #end
+      }
+      @parser.parse
+    end
   end
 
   context 'when parsing a document with encoding issues' do
