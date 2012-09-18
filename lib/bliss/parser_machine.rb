@@ -150,9 +150,6 @@ module Bliss
       value_at = @nodes.value_at_chain(@depth)
 
       if value_at.is_a? Hash
-        #if @current_content.is_a? Hash
-        #  puts "Epa: #{@current_content.inspect}"
-        #end
         current[element] = @current_content #if @current_content.size > 0
       elsif value_at.is_a? NilClass
         if current.is_a? Array

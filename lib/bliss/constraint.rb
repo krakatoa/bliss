@@ -30,6 +30,7 @@ module Bliss
 
               found = false
               self.tag_names.each do |key|
+                break if hash.is_a? String
                 if hash.keys.include?(key)
                   found = true
                   break
