@@ -35,10 +35,18 @@ describe Bliss::Parser do
       
       @parser = Bliss::Parser.new('mock')
 
+      #Sumavisos::Parsers::Format.formats.values.each { |format|                                                                                                                                                                                                          
+      #  format.reset_constraints_state                                                                                                                                                                                                                                   
+      #sax_parser.add_format(format)                                                                                                                                                                                                                                    
+      #}
+      format = Bliss::Format.new(File.dirname(File.expand_path(__FILE__)) + "/mock/tag_name_required.yml")
+      format.reset_constraints_state
+      @parser.add_format(format)
+
       count = 0
       @parser.on_tag_close("root/item") { |hash, depth|
         #puts hash.inspect
-        hash['name'].should == ""
+        hash['name'].should == {}
         #count += 1
         #case count
         #  when 1
@@ -48,6 +56,8 @@ describe Bliss::Parser do
         #end
       }
       @parser.parse
+
+      puts format.details.inspect
     end
   end
 

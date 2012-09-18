@@ -39,6 +39,8 @@ module Bliss
                 @state = :passed
               else
                 if @setting == :tag_name_required
+                  puts "hash: #{hash.inspect}"
+                  puts "self.tag_names: #{self.tag_names.inspect}"
                   @state = :not_passed
                 end
               end
