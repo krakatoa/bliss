@@ -150,11 +150,11 @@ module Bliss
       value_at = @nodes.value_at_chain(@depth)
 
       if value_at.is_a? Hash
-        current[element] = @current_content #if @current_content.size > 0
+        current[element] = @current_content if @current_content.size > 0
       elsif value_at.is_a? NilClass
         if current.is_a? Array
           current = current.last
-          current[element] = @current_content #if @current_content.size > 0
+          current[element] = @current_content if @current_content.size > 0
         end
       end
       @current_content = ''
