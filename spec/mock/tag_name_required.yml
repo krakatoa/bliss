@@ -1,0 +1,5 @@
+---
+root:
+  item:
+    name:
+      tag_name_required: true
