@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Fernando Alonso"]
-  s.date = "2012-09-17"
+  s.date = "2012-09-18"
   s.description = "streamed xml parsing tool"
   s.email = "krakatoa1987@gmail.com"
   s.extra_rdoc_files = [
@@ -43,6 +43,7 @@ Gem::Specification.new do |s|
     "spec/constraint_spec.rb",
     "spec/format_spec.rb",
     "spec/mock/encoding.xml",
+    "spec/mock/tag_name_required.yml",
     "spec/parser_spec.rb",
     "spec/spec_helper.rb",
     "test.rb",
