@@ -49,6 +49,28 @@ describe Bliss::Parser do
       
       ads.size.should == 1
     end
+
+    it "should not eat spaces" do
+      mocked_request('
+<ads>
+  <ad>
+    <property_type>Terreno ó Lote</property_type>
+    <foo>bar</foo>
+  </ad>
+</ads>
+')
+      
+      @parser = Bliss::Parser.new('mock')
+
+      
+      @parser.on_tag_close("ads/ad") { |hash, depth|
+        hash['foo'].should == "bar"
+        hash['property_type'].should == "Terreno ó Lote"
+        puts hash
+      }
+      @parser.parse
+
+    end
   end
 
   context 'when parsing a document with encoding issues' do
@@ -61,13 +83,18 @@ describe Bliss::Parser do
       mocked_request(xml)
 
       @parser = Bliss::Parser.new('mock', "test.xml")
+      res = []
+#      exceptions = []
 
-      begin
-        puts "\n --PARSING--"
-        @parser.parse
-      rescue Bliss::EncodingError => err
-        puts "Encoding error!"
-      end
+      @parser.on_tag_close("root/ad") { |hash, depth|
+        res << true
+      }
+      puts "\n --PARSING--"
+      @parser.parse
+
+      res.count.should == 2 
+#      exceptions.count.should == 1
+#      exceptions.first.should be_an_instance_of Bliss::EncodingError
     end
  
 =begin
