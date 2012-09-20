@@ -1,3 +1,4 @@
+require "nokogiri"
 module Bliss
   class ParserMachine < Nokogiri::XML::SAX::Document
     def initialize(parser)
@@ -133,7 +134,7 @@ module Bliss
       #end
       
       current_node = nil
-      if value_at.empty?
+      if value_at.empty? || value_at.strip == ''
         current_node = current #@on_tag_close[reg].call(current, @depth)
       else
         current_node = value_at #@on_tag_close[reg].call(value_at, @depth)
@@ -208,7 +209,6 @@ module Bliss
     end
 
     def concat_content(string)
-      string.strip!
       if string
         @current_content << string
       end
