@@ -29,6 +29,81 @@ describe Bliss::Parser do
       }
       @parser.parse
     end
+
+		it "should read nested elements" do
+			xml = <<-EOF
+<root>
+	<item>
+		<container>
+			<nested>1</nested>
+			<nested>2</nested>
+			<nested>3</nested>
+		</container>
+	</item>
+</root>
+EOF
+
+      mocked_request(xml)
+      
+      @parser = Bliss::Parser.new('mock')
+
+      ads = []
+      
+      @parser.on_tag_close("root/item/container/nested") { |hash, depth|
+				#puts "depth: #{depth.inspect}"
+				#puts hash.inspect
+				#puts "\n"
+        ads << hash
+      }
+      @parser.parse
+			#puts ads.inspect
+      
+      ads.size.should == 3
+		end
+		
+		it "should read containers of nested elements" do
+			xml = <<-EOF
+<root>
+	<item>
+		<container>
+			<nested>1</nested>
+			<nested>2</nested>
+			<nested>3</nested>
+		</container>
+	</item>
+	<item>
+		<id>a</id>
+		<container>
+			<nested>4</nested>
+			<nested>5</nested>
+		</container>
+	</item>
+</root>
+EOF
+
+      mocked_request(xml)
+      
+      @parser = Bliss::Parser.new('mock')
+
+      ads = []
+      
+      @parser.on_tag_close("root/item") { |hash, depth|
+				#puts "on_tag_close@#{depth.inspect}"
+				puts hash.inspect
+				#puts "\n"
+        ads << hash
+      }
+      @parser.parse
+      ads.size.should == 2
+			ads[0].should have_key("container")
+			ads[0]["container"].should have_key("nested")
+			ads[0]["container"]["nested"].should == ["1", "2", "3"]
+			ads[1].should have_key("id")
+			ads[1]["id"].should == "a"
+			ads[1].should have_key("container")
+			ads[1]["container"].should have_key("nested")
+			ads[1]["container"]["nested"].should == ["4", "5"]
+		end
     
     it "should parse" do
       mocked_request("<root><item><name><![CDATA[]]></name></item></root>")

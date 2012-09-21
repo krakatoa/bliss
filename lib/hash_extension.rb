@@ -1,12 +1,16 @@
 class Hash
   def value_at_chain(chain)
     current = self
-    chain.each do |key|
+		return nil if chain.size == 0
+    chain.each_with_index do |key, i|
+			if current.is_a? Array
+				current = current.last
+			end
       if current.is_a? Hash and current.has_key? key
-        current = current[key]
         if current.is_a? Array
           current = current.last
         end
+        current = current[key]
       else
         current = nil
         break

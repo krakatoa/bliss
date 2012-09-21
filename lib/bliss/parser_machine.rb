@@ -56,15 +56,8 @@ module Bliss
     def start_element(element, attributes)
       return if is_closed?
       # element_transformation
-
-      if @root == nil
-        @root = element
-        if @on_root.is_a? Proc
-          @on_root.call(@root)
-        end
-      end
-
-      @depth.push(element) if @depth.last != element
+			
+			@depth.push(element) if @depth.last != element
       
       # TODO search on hash with xpath style
       # for example:
@@ -81,28 +74,49 @@ module Bliss
         @on_tag_open[reg].call(@depth)
       end
 
-      current = @nodes.pair_at_chain(@depth)
+			###
+			if @depth.size == 1
+				current = @nodes.pair_at_chain(@depth[0..-2])
+				value_at = @nodes.value_at_chain(@depth[0..-2])
+			else
+      	current = @nodes.pair_at_chain(@depth)
+      	value_at = @nodes.value_at_chain(@depth)
+			end
 
-      value_at = @nodes.value_at_chain(@depth)
+			#	puts "start_element-INITS@#{@depth.inspect}"
+			#	puts "nodes: #{@nodes.inspect}"
+			#	puts "current: #{current.inspect}"
+			#	puts "valueAt: #{value_at.inspect}"
+			
+			#puts "depth: #{@depth.inspect},"
+			#puts "starts: #{@nodes.inspect}"
+			#puts "\n"
       
+			if current.is_a? Array
+				current = current.last
+			end
       if current.is_a? Hash
-        if value_at.is_a? NilClass
-          current[element] = {}
-        elsif value_at.is_a? Hash
-          if current[element].is_a? Array
-            current[element].concat [{}]
-          else
-            current[element] = [current[element], {}]
-            #current = @nodes.pair_at_chain(@depth)
-          end
-        elsif value_at.is_a? Array
-          #puts @depth.inspect
-          #puts current[element].inspect
-          #puts current[element].inspect
-        end
-      elsif current.is_a? Array
+				exists = true if current[element]
+				if exists
+					#puts "nodo ya existe"
+					if current[element].is_a? Array
+						current[element].concat [{}]
+					else
+						# TODO use this code to collect elements as batches
+						current[element] = [current[element], {}]
+						# DO NOT REMOVE
+					end
+				else
+					current[element] = {}
+				end
+			elsif current.is_a? NilClass
+				@nodes[element] = {}
       end
 
+			#puts "depth: #{@depth.inspect},"
+			#puts "finishes: #{@nodes.inspect}"
+			#puts "\n"
+			
       @current_content = ''
     end
 
@@ -134,11 +148,14 @@ module Bliss
       #end
       
       current_node = nil
-      if value_at.empty? || value_at.strip == ''
+      if value_at.empty? #|| value_at.strip == ''
         current_node = current #@on_tag_close[reg].call(current, @depth)
       else
         current_node = value_at #@on_tag_close[reg].call(value_at, @depth)
       end
+			if current_node.is_a? Array
+				current_node = current_node.last
+			end
       current_node[@depth.last] = ""
       current_node
     end
@@ -149,15 +166,28 @@ module Bliss
 
       current = @nodes.pair_at_chain(@depth)
       value_at = @nodes.value_at_chain(@depth)
+			#if @depth.last == "id"
+			#	puts "ending@#{@depth.inspect}"			
+			#	puts "nodes: #{@nodes.inspect}"
+			#	puts "current: #{current.inspect}"
+			#	puts "value_at: #{value_at.inspect}"
+			#	puts "\n"
+			#end
 
-      if value_at.is_a? Hash
-        current[element] = @current_content if @current_content.size > 0
-      elsif value_at.is_a? NilClass
-        if current.is_a? Array
-          current = current.last
-          current[element] = @current_content if @current_content.size > 0
-        end
-      end
+			if current.is_a? Array
+				current = current.last
+			end
+			if current.is_a? Hash
+				if (value_at.is_a? Hash and value_at.size == 0) #or value_at.is_a? NilClass
+					current[element] = @current_content if @current_content.size > 0
+				end
+				#if value_at.is_a? Array #or !(value_at.last.is_a? Hash and value_at.size == 0)
+				override = true if value_at.is_a?(Array)
+				override = false if value_at.is_a?(Array) and value_at.last.is_a?(Hash) and value_at.last.size > 0
+				if override
+					current[element][-1] = @current_content if @current_content.size > 0
+				end
+			end
       @current_content = ''
 
       # TODO search on hash with xpath style
@@ -166,6 +196,14 @@ module Bliss
       # keys: root/ad/url
       # @on_tag_close.keys.select {|key| @depth.match(key)}
       ##
+
+			#if @depth.last == "id"
+			#	puts "ended@#{@depth.inspect}"			
+			#	puts "nodes: #{@nodes.inspect}"
+			#	puts "current: #{current.inspect}"
+			#	puts "value_at: #{value_at.inspect}"
+			#	puts "\n"
+			#end
 
       search_key = @depth.join('/') # element
       
@@ -182,10 +220,13 @@ module Bliss
         if @ignore_close.include? search_key
           @ignore_close.delete(search_key)
         else
-          if value_at.empty?
-            @on_tag_close[reg].call(current, @depth)
+					if value_at.is_a? Array
+						value_at = value_at.last
+					end
+          if value_at.is_a? NilClass or value_at.empty?
+            @on_tag_close[reg].call(current.dup, @depth)
           else
-            @on_tag_close[reg].call(value_at, @depth)
+            @on_tag_close[reg].call(value_at.dup, @depth)
           end
         end
       end
