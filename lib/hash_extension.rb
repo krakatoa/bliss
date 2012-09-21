@@ -41,3 +41,8 @@ class Hash
     depth.pop
   end
 end
+class String
+  def attrs
+    @attrs ||= {}
+  end
+end

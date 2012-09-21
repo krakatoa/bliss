@@ -148,6 +148,34 @@ EOF
     end
   end
 
+  context "parsing XML attributes" do
+    it "should parse them right" do
+      xml = <<-EOF
+<root>
+  <item>
+    <element attribute1="bla" attribute2="blo">
+      1
+    </element>
+  </item>
+</root>
+EOF
+
+      mocked_request(xml)
+
+      @parser = Bliss::Parser.new("mock", "test.xml")
+
+      @parser.on_tag_close("root/item") { |hash, depth|
+        puts hash.inspect
+        hash.should have_key("element")
+        hash["element"].attrs.should be_a Hash
+        hash["element"].attrs["attribute1"].should == "bla"
+        hash["element"].attrs["attribute2"].should == "blo"
+      }
+
+      @parser.parse
+    end
+  end
+
   context 'when parsing a document with encoding issues' do
     it "should throw an Exception and continue parsing" do
       #xml = <<-EOF

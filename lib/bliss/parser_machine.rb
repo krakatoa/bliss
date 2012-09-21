@@ -118,6 +118,8 @@ module Bliss
 			#puts "\n"
 			
       @current_content = ''
+      @current_content.attrs.merge!(Hash[*attributes.flatten])
+      @current_content
     end
 
     def characters(string)
