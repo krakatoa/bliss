@@ -177,7 +177,7 @@ EOF
   end
 
   context 'when parsing a document with encoding issues' do
-    it "should throw an Exception and continue parsing" do
+    it "should raise the on_error callback and continue parsing" do
       #xml = <<-EOF
       #EOF
 
@@ -187,16 +187,24 @@ EOF
 
       @parser = Bliss::Parser.new('mock', "test.xml")
       res = []
-#      exceptions = []
+      exceptions = []
+
+      @parser.on_error { |error_type, details|
+        error_type.should == "encoding"
+        details.should be_a(Hash)
+        details.should have_key(:partial_node)
+        details.should have_key(:line)
+
+        exceptions << true
+      }
 
       @parser.on_tag_close("root/ad") { |hash, depth|
         res << true
       }
-      puts "\n --PARSING--"
       @parser.parse
 
       res.count.should == 2 
-#      exceptions.count.should == 1
+      exceptions.count.should == 2
 #      exceptions.first.should be_an_instance_of Bliss::EncodingError
     end
  

@@ -2,10 +2,18 @@
 
 * Features
 
+  * Added support for attributes: read them by calling .attrs in the content of the element.
   * Added tag_name_suggested constraint type.
+  * Refactored many classes, thus reading is easier.
+  * Errors (by now just encoding errors) can be handled via the on_error callback, which returns [error_type, details] in such case.
+  * Parser keeps working even if there are encoding errors.
+  * Integrated with TravisCI for continuous integration.
 
 * Bugfixes
 
+  * Nested elements weren't being handled ok, specs for this were being added.
+  * Fixed various bugs related with white spaces and lines.
+  * Reading of compressed files was causing problems.
   * Not required tag_names now work in any depth level, no longer at last level only.
 
 == 0.1.0
