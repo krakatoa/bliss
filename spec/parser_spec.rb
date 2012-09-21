@@ -88,9 +88,6 @@ EOF
       ads = []
       
       @parser.on_tag_close("root/item") { |hash, depth|
-				#puts "on_tag_close@#{depth.inspect}"
-				puts hash.inspect
-				#puts "\n"
         ads << hash
       }
       @parser.parse
@@ -178,9 +175,6 @@ EOF
 
   context 'when parsing a document with encoding issues' do
     it "should raise the on_error callback and continue parsing" do
-      #xml = <<-EOF
-      #EOF
-
       xml = File.read(File.dirname(File.expand_path(__FILE__)) + "/mock/encoding.xml")
 
       mocked_request(xml)
@@ -205,7 +199,6 @@ EOF
 
       res.count.should == 2 
       exceptions.count.should == 2
-#      exceptions.first.should be_an_instance_of Bliss::EncodingError
     end
  
 =begin
