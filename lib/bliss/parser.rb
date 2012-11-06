@@ -246,7 +246,7 @@ module Bliss
         }
         http.callback {|http|
           if @on_finished
-            @on_finished.call
+            @on_finished.call(http)
           end
           parser.secure_close
         }
