@@ -82,6 +82,10 @@ module Bliss
       @on_timeout = block
     end
 
+    def on_finished(&block)
+      @on_finished = block
+    end
+
     def wait_tag_close(element)
       @wait_tag_close = "</#{element}>"
     end
@@ -240,11 +244,10 @@ module Bliss
           end
           parser.secure_close
         }
-        http.callback {
-          #if @file
-          #  @file.close
-          #end
-          #EM.stop
+        http.callback {|http|
+          if @on_finished
+            @on_finished.call
+          end
           parser.secure_close
         }
       end
