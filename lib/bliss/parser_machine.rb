@@ -57,7 +57,7 @@ module Bliss
       return if is_closed?
       # element_transformation
 			
-			@depth.push(element) if @depth.last != element
+			@depth.push(element)
       
       # TODO search on hash with xpath style
       # for example:
