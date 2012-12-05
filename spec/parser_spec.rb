@@ -175,6 +175,36 @@ describe Bliss::Parser do
     end
   end
 
+  context "when XML has an element nested in another with the same name" do
+    it "should parse them right" do
+      xml = <<-XML
+        <root>
+          <item>
+            <element>
+              <element>1</element>
+              <element>2</element>
+            </element>
+          </item>
+        </root>
+      XML
+      mocked_request(xml)
+
+      @parser = Bliss::Parser.new("mock")
+
+      @parser.on_tag_close("root/item") do |hash, depth|
+        #puts "**** #{hash} ****"
+        hash.should have_key("element")
+        hash["element"].should be_a Hash
+        hash["element"].should have_key("element")
+        hash["element"]["element"].should be_a Array
+        hash["element"]["element"].size.should be_equal 2
+        hash["element"]["element"].should == ["1", "2"]
+      end
+
+      @parser.parse
+    end
+  end
+
   context 'when parsing a document with encoding issues' do
     it "should raise the on_error callback and continue parsing" do
       xml = File.read(File.dirname(File.expand_path(__FILE__)) + "/mock/encoding.xml")
