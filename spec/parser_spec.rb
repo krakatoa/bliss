@@ -140,7 +140,7 @@ describe Bliss::Parser do
       @parser.on_tag_close("ads/ad") { |hash, depth|
         hash['foo'].should == "bar"
         hash['property_type'].should == "Terreno ó Lote"
-        puts hash
+        #puts hash
       }
       @parser.parse
 
@@ -164,7 +164,7 @@ describe Bliss::Parser do
       @parser = Bliss::Parser.new("mock", "test.xml")
 
       @parser.on_tag_close("root/item") { |hash, depth|
-        puts hash.inspect
+        #puts hash.inspect
         hash.should have_key("element")
         hash["element"].attrs.should be_a Hash
         hash["element"].attrs["attribute1"].should == "bla"
