@@ -31,17 +31,17 @@ describe Bliss::Parser do
     end
 
 		it "should read nested elements" do
-			xml = <<-EOF
-<root>
-	<item>
-		<container>
-			<nested>1</nested>
-			<nested>2</nested>
-			<nested>3</nested>
-		</container>
-	</item>
-</root>
-EOF
+			xml = <<-XML
+        <root>
+          <item>
+            <container>
+              <nested>1</nested>
+              <nested>2</nested>
+              <nested>3</nested>
+            </container>
+          </item>
+        </root>
+      XML
 
       mocked_request(xml)
       
@@ -62,24 +62,24 @@ EOF
 		end
 		
 		it "should read containers of nested elements" do
-			xml = <<-EOF
-<root>
-	<item>
-		<container>
-			<nested>1</nested>
-			<nested>2</nested>
-			<nested>3</nested>
-		</container>
-	</item>
-	<item>
-		<id>a</id>
-		<container>
-			<nested>4</nested>
-			<nested>5</nested>
-		</container>
-	</item>
-</root>
-EOF
+			xml = <<-XML
+        <root>
+          <item>
+            <container>
+              <nested>1</nested>
+              <nested>2</nested>
+              <nested>3</nested>
+            </container>
+          </item>
+          <item>
+            <id>a</id>
+            <container>
+              <nested>4</nested>
+              <nested>5</nested>
+            </container>
+          </item>
+        </root>
+      XML
 
       mocked_request(xml)
       
@@ -123,14 +123,16 @@ EOF
     end
 
     it "should not eat spaces" do
-      mocked_request('
-<ads>
-  <ad>
-    <property_type>Terreno ó Lote</property_type>
-    <foo>bar</foo>
-  </ad>
-</ads>
-')
+      xml = <<-XML
+        <ads>
+          <ad>
+            <property_type>Terreno ó Lote</property_type>
+            <foo>bar</foo>
+          </ad>
+        </ads>
+      XML
+
+      mocked_request(xml)
       
       @parser = Bliss::Parser.new('mock')
 
@@ -138,7 +140,7 @@ EOF
       @parser.on_tag_close("ads/ad") { |hash, depth|
         hash['foo'].should == "bar"
         hash['property_type'].should == "Terreno ó Lote"
-        puts hash
+        #puts hash
       }
       @parser.parse
 
@@ -147,27 +149,57 @@ EOF
 
   context "parsing XML attributes" do
     it "should parse them right" do
-      xml = <<-EOF
-<root>
-  <item>
-    <element attribute1="bla" attribute2="blo">
-      1
-    </element>
-  </item>
-</root>
-EOF
+      xml = <<-XML
+        <root>
+          <item>
+            <element attribute1="bla" attribute2="blo">
+              1
+            </element>
+          </item>
+        </root>
+      XML
 
       mocked_request(xml)
 
       @parser = Bliss::Parser.new("mock", "test.xml")
 
       @parser.on_tag_close("root/item") { |hash, depth|
-        puts hash.inspect
+        #puts hash.inspect
         hash.should have_key("element")
         hash["element"].attrs.should be_a Hash
         hash["element"].attrs["attribute1"].should == "bla"
         hash["element"].attrs["attribute2"].should == "blo"
       }
+
+      @parser.parse
+    end
+  end
+
+  context "when XML has an element nested in another with the same name" do
+    it "should parse them right" do
+      xml = <<-XML
+        <root>
+          <item>
+            <element>
+              <element>1</element>
+              <element>2</element>
+            </element>
+          </item>
+        </root>
+      XML
+      mocked_request(xml)
+
+      @parser = Bliss::Parser.new("mock")
+
+      @parser.on_tag_close("root/item") do |hash, depth|
+        #puts "**** #{hash} ****"
+        hash.should have_key("element")
+        hash["element"].should be_a Hash
+        hash["element"].should have_key("element")
+        hash["element"]["element"].should be_a Array
+        hash["element"]["element"].size.should be_equal 2
+        hash["element"]["element"].should == ["1", "2"]
+      end
 
       @parser.parse
     end

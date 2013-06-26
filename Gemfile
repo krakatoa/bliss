@@ -14,5 +14,12 @@ group :development do
   gem "bundler", "~> 1.1.3"
   gem "jeweler", "~> 1.8.4"
   gem "simplecov"
+  #gem "debugger"
   #gem "rcov", ">= 0"
+
+  gem "guard"
+  gem "guard-rspec"
+  gem "rb-inotify", :require => false
+  gem "rb-fsevent", :require => false
+  gem "rb-fchange", :require => false
 end
